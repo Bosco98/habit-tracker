@@ -13,7 +13,11 @@
 </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Habit: Cloud Sync</title>
+     <link rel="manifest" href="/habit-tracker/manifest.json">
+      <meta name="theme-color" content="#c9f0cb">
+    <link rel="apple-touch-icon" href="/habit-tracker/icons/icon-192.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Habit Tracker : No Sign-up or Login</title>
     <meta name="description" content="Track daily habits with an interactive grid, XP insights, and optional Google Sheets sync inside the Habit Tracker web app.">
     <meta name="keywords" content="habit tracker, habit app, daily habits, productivity tracker, google sheets sync">
     <meta name="author" content="Habit Tracker">
@@ -418,6 +422,8 @@
                 <input id="importJSONInput" type="file" accept=".json,application/json" class="hidden"
                     onchange="handleJSONImport(event)">
             </div>
+             <button class="w-full bg-slate-700 text-white py-2 rounded text-xs font-bold hover:bg-slate-800" id="enableNotifications"> Enable Daily Reminders 🔔</button>
+
         </div>
     </div>
 
@@ -1783,6 +1789,88 @@
                 document.getElementById('sheetNameDisplay').innerText = "Error loading name";
             }
         }
+
+        /* -----------------------------
+   Service Worker Registration
+------------------------------ */
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/habit-tracker/service-worker.js");
+  });
+}
+
+/* -----------------------------
+   Notification Permission
+------------------------------ */
+document.getElementById("enableNotifications").addEventListener("click", async () => {
+  if (!("Notification" in window)) {
+    alert("Notifications not supported");
+    return;
+  }
+
+  const permission = await Notification.requestPermission();
+  if (permission === "granted") {
+    scheduleNextNotification();
+    alert("Daily reminders enabled ✅");
+  }
+});
+
+/* -----------------------------
+   Random Daily Time Generator
+------------------------------ */
+function getRandomTime() {
+  const now = new Date();
+  const minHour = 9;
+  const maxHour = 21;
+
+  const hour = Math.floor(Math.random() * (maxHour - minHour)) + minHour;
+  const minute = Math.floor(Math.random() * 60);
+
+  const target = new Date();
+  target.setHours(hour, minute, 0, 0);
+
+  if (target < now) {
+    target.setDate(target.getDate() + 1);
+  }
+
+  return target.getTime();
+}
+
+/* -----------------------------
+   Schedule Notification
+------------------------------ */
+function scheduleNextNotification() {
+  const time = getRandomTime();
+  localStorage.setItem("nextNotificationTime", time);
+}
+
+/* -----------------------------
+   Show Notification
+------------------------------ */
+function showNotification() {
+  navigator.serviceWorker.ready.then(registration => {
+    registration.showNotification("Habit Reminder 💪", {
+      body: "Log your habits and keep your streak alive!",
+      icon: "/habit-tracker/icons/icon-192.png",
+      badge: "/habit-tracker/icons/icon-192.png",
+      vibrate: [100, 50, 100]
+    });
+  });
+}
+
+/* -----------------------------
+   Check Loop (every minute)
+------------------------------ */
+setInterval(() => {
+  const nextTime = localStorage.getItem("nextNotificationTime");
+  if (!nextTime) return;
+
+  if (Date.now() >= Number(nextTime)) {
+    showNotification();
+    scheduleNextNotification();
+  }
+}, 60000);
+
     </script>
     <script data-name="BMC-Widget" data-cfasync="false" src="https://cdnjs.buymeacoffee.com/1.0.0/widget.prod.min.js"
         data-id="bosco98123u" data-description="Support me on Buy me a coffee!" data-message="" data-color="#5F7FFF"
