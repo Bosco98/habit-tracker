@@ -3,22 +3,23 @@
 
 <head>
     <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-E9YNJ2TWT3"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-E9YNJ2TWT3"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
 
-  gtag('config', 'G-E9YNJ2TWT3');
-</script>
+        gtag('config', 'G-E9YNJ2TWT3');
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-     <link rel="manifest" href="/manifest.json">
-      <meta name="theme-color" content="#c9f0cb">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#c9f0cb">
     <link rel="apple-touch-icon" href="/icons/icon-192.png">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Habit Tracker : No Sign-up or Login</title>
-    <meta name="description" content="Track daily habits with an interactive grid, XP insights, and optional Google Sheets sync inside the Habit Tracker web app.">
+    <meta name="description"
+        content="Track daily habits with an interactive grid, XP insights, and optional Google Sheets sync inside the Habit Tracker web app.">
     <meta name="keywords" content="habit tracker, habit app, daily habits, productivity tracker, google sheets sync">
     <meta name="author" content="Habit Tracker">
     <meta name="robots" content="index, follow">
@@ -26,11 +27,13 @@
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="Habit Tracker">
     <meta property="og:title" content="Habit Tracker Cloud Sync App">
-    <meta property="og:description" content="Monitor streaks, XP, and trends while syncing habits to Google Sheets in minutes.">
+    <meta property="og:description"
+        content="Monitor streaks, XP, and trends while syncing habits to Google Sheets in minutes.">
     <meta property="og:url" content="https://habit-tracker.fun/">
     <meta name="twitter:card" content="summary">
     <meta name="twitter:title" content="Habit Tracker Cloud Sync App">
-    <meta name="twitter:description" content="Monitor streaks, XP insights, and trend charts with seamless Google Sheets syncing.">
+    <meta name="twitter:description"
+        content="Monitor streaks, XP insights, and trend charts with seamless Google Sheets syncing.">
     <meta name="twitter:url" content="https://habit-tracker.fun/">
     <meta name="google-adsense-account" content="ca-pub-2981343356966723">
     <script type="application/ld+json">
@@ -200,15 +203,15 @@
             transition: transform 0.2s;
         }
 
-        #cloudSyncToggle:checked + .toggle-track {
+        #cloudSyncToggle:checked+.toggle-track {
             background-color: #2563eb;
         }
 
-        #cloudSyncToggle:checked + .toggle-track .toggle-thumb {
+        #cloudSyncToggle:checked+.toggle-track .toggle-thumb {
             transform: translate(16px, -50%);
         }
 
-        #cloudSyncToggle:focus-visible + .toggle-track {
+        #cloudSyncToggle:focus-visible+.toggle-track {
             box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.4);
         }
     </style>
@@ -223,35 +226,44 @@
                 <h1 class="text-2xl font-bold text-slate-900">Habit Tracker</h1>
             </div>
             <div class="flex items-center gap-3">
-                <div
-                    class="bg-white px-4 h-12 rounded-lg shadow-sm border border-slate-200 text-right flex flex-col justify-center">
-                    <p class="text-[10px] font-bold uppercase text-slate-400 leading-none">Total XP</p>
-                    <p id="totalXP" class="text-xl font-black text-blue-600 leading-tight">0</p>
-                </div>
-
                 <button onclick="toggleHabitManager()"
                     class="bg-slate-800 text-white px-4 h-12 rounded-lg text-xs font-semibold hover:bg-slate-700 transition flex items-center justify-center">
-                    Change Habits ✏️
+                    ✏️ Habits
                 </button>
                 <button onclick="toggleAppSettingManager()"
                     class="bg-slate-800 text-white px-4 h-12 rounded-lg text-xs font-semibold hover:bg-slate-700 transition flex items-center justify-center">
                     ⚙️
+                </button>
+                <button onclick="window.location.href='share.html'"
+                    class="bg-slate-800 text-white px-4 h-12 rounded-lg text-xs font-semibold hover:bg-slate-700 transition flex items-center justify-center">
+                    🔗
                 </button>
             </div>
 
         </header>
 
         <!-- Stats -->
-        <section class="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100">
+        <section class="grid grid-cols-1 md:grid-cols-5 gap-4">
+            <div class="bg-white p-3 rounded-xl shadow-sm border border-slate-100">
                 <h3 class="text-slate-400 text-[10px] font-bold uppercase mb-1">Top Performer</h3>
                 <div id="bestHabit" class="text-base font-bold text-slate-800 truncate">Calculating...</div>
             </div>
-            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100">
-                <h3 class="text-slate-400 text-[10px] font-bold uppercase mb-1">Monthly Completion</h3>
-                <div id="completionRate" class="text-2xl font-black text-slate-800">0%</div>
+            <div class="bg-white p-3 rounded-xl shadow-sm border border-slate-100">
+                <h3 class="text-slate-400 text-[10px] font-bold uppercase mb-1">Month's Goal</h3>
+                <div class="text-2xl font-black text-slate-800">
+                    <span id="totalXP">0 XP</span>
+                    <span class="text-slate-300 text-sm">/</span>
+                    <span id="GoalDisplay" class="text-slate-300 text-sm">0 XP</span>
+
+                </div>
             </div>
-            <div id="sheetsSyncCard" class="bg-white p-4 rounded-xl shadow-sm border border-slate-100">
+            <div class="bg-white p-3 rounded-xl shadow-sm border border-slate-100">
+                <h3 class="text-slate-400 text-[10px] font-bold uppercase mb-1">Monthly Completion</h3>
+                <div class="text-2xl font-black text-slate-800">
+                    <span id="completionRate">0%</span>
+                </div>
+            </div>
+            <div id="sheetsSyncCard" class="bg-white p-3 rounded-xl shadow-sm border border-slate-100">
                 <h3 class="text-slate-400 text-[10px] font-bold uppercase mb-1">Sheets sync</h3>
                 <div id="apiStatusDisplay" class="text-sm font-bold text-red-500 mb-2">Not Configured</div>
                 <div class="flex gap-1">
@@ -276,7 +288,7 @@
 
         <!-- Tracker Grid -->
         <section class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-            <div class="px-4 py-3 bg-slate-50 border-b border-slate-200 flex justify-between items-center">
+            <div class="px-3 py-3 bg-slate-50 border-b border-slate-200 flex justify-between items-center">
                 <h2 class="font-bold text-slate-700 text-sm">Monthly Log</h2>
                 <button onclick="clearAllLogs()"
                     class="bg-red-500 text-white px-3 py-1.5 rounded-lg text-[10px] font-bold hover:bg-red-600 transition">
@@ -335,7 +347,8 @@
             </div>
             <div class="flex items-center justify-between mb-2">
                 <h3 class="text-[10px] font-bold text-slate-400 uppercase">Google Sheets Management</h3>
-                <label class="inline-flex items-center cursor-pointer text-[10px] font-bold text-slate-500 uppercase gap-2">
+                <label
+                    class="inline-flex items-center cursor-pointer text-[10px] font-bold text-slate-500 uppercase gap-2">
                     <span>Enabled</span>
                     <input id="cloudSyncToggle" type="checkbox" class="sr-only">
                     <span class="toggle-track">
@@ -343,7 +356,8 @@
                     </span>
                 </label>
             </div>
-            <div id="googleSheetsManagementSection" class="space-y-4 mb-6 p-4 bg-slate-50 rounded-xl border border-slate-200">
+            <div id="googleSheetsManagementSection"
+                class="space-y-4 mb-6 p-4 bg-slate-50 rounded-xl border border-slate-200">
                 <div class="p-3 bg-blue-50 border border-blue-200 rounded-lg text-[11px] text-blue-800 mb-2">
                     <strong>Setup Instructions:</strong><br>
                     1. Go to <a href="https://console.cloud.google.com" target="_blank" class="underline">Google Cloud
@@ -424,7 +438,8 @@
             </div>
             <div class="pt-4 border-t border-slate-100 space-y-2">
                 <h3 class="text-[10px] font-bold text-slate-400 uppercase mb-2">Notifications ( 🔔Might not work ) </h3>
-             <button class="w-full bg-slate-700 text-white py-2 rounded text-xs font-bold hover:bg-slate-800" id="enableNotifications"> Enable Daily Reminders 🔔</button>
+                <button class="w-full bg-slate-700 text-white py-2 rounded text-xs font-bold hover:bg-slate-800"
+                    id="enableNotifications"> Enable Daily Reminders 🔔</button>
             </div>
         </div>
     </div>
@@ -432,9 +447,17 @@
     <div id="habitModal" class="modal">
         <div class="bg-white rounded-2xl p-6 max-w-md w-full mx-4 shadow-2xl overflow-y-auto max-h-[90vh]">
             <div class="flex justify-between items-center mb-6">
-                <h2 class="text-xl font-bold text-slate-800">App Settings</h2>
+                <h2 class="text-xl font-bold text-slate-800">Habit Management</h2>
                 <button onclick="toggleHabitManager()" class="text-slate-400 hover:text-slate-600 p-2">✕</button>
             </div>
+            <div class="pt-4 border-t border-slate-100">
+                <h3 class="text-[10px] font-bold text-slate-400 uppercase mb-2">Set Goal</h3>
+                <input id="monthlyGoalInput" type="number" min="0" placeholder="Monthly XP Goal"
+                    class="w-full px-3 py-2 border rounded-lg text-sm outline-none mb-4">
+                <button onclick="setMonthlyGoal()"
+                    class="w-full bg-slate-800 text-white py-2 rounded-lg text-sm font-bold">Set Goal</button>
+            </div>
+            <hr>
             <div class="pt-4 border-t border-slate-100">
                 <h3 class="text-[10px] font-bold text-slate-400 uppercase mb-2">Habit Management</h3>
                 <div class="p-3 bg-amber-50 border border-amber-200 rounded-lg text-[11px] text-amber-800">
@@ -472,6 +495,7 @@
         let tokenRefreshTimeout = null;
         let tokenClientOptions = {};
         let cloudSyncEnabled = localStorage.getItem('cloud_sync_enabled') === 'true';
+        let Goal = parseInt(localStorage.getItem('monthly_goal')) || (15 * getDaysInMonth(new Date().getFullYear(), new Date().getMonth()));
 
         function isLikelyApiKey(key) {
             if (!key || typeof key !== 'string') {
@@ -1382,8 +1406,9 @@
             }
 
             document.getElementById('totalXP').innerText = totalXP.toLocaleString();
-            const rate = totalCells > 0 ? Math.round((checkedCells / totalCells) * 100) : 0;
+            const rate = Goal > 0 ? Math.min(Math.round((totalXP / Goal) * 100), 100) : 0;
             document.getElementById('completionRate').innerText = `${rate}%`;
+            document.getElementById('GoalDisplay').innerText = `${Goal.toLocaleString()} XP`;
 
             let bestName = "None";
             let maxCount = -1;
@@ -1600,6 +1625,10 @@
             modal.classList.toggle('active');
             if (modal.classList.contains('active')) {
                 renderHabitList();
+                const days = getDaysInMonth(currentYear, currentMonth);
+                const goalValue = localStorage.getItem('monthly_goal') ?? (15 * days).toString();
+                if (!localStorage.getItem('monthly_goal')) localStorage.setItem('monthly_goal', (15 * days).toString());
+                document.getElementById('monthlyGoalInput').value = goalValue;
             }
         }
 
@@ -1795,92 +1824,105 @@
         /* -----------------------------
    Service Worker Registration
 ------------------------------ */
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker.register("/service-worker.js");
-  });
-}
+        if ("serviceWorker" in navigator) {
+            window.addEventListener("load", () => {
+                navigator.serviceWorker.register("/service-worker.js");
+            });
+        }
 
-/* -----------------------------
-   Notification Permission
------------------------------- */
-document.getElementById("enableNotifications").addEventListener("click", async () => {
-  if (!("Notification" in window)) {
-    alert("Notifications not supported");
-    return;
-  }
+        /* -----------------------------
+           Notification Permission
+        ------------------------------ */
+        document.getElementById("enableNotifications").addEventListener("click", async () => {
+            if (!("Notification" in window)) {
+                alert("Notifications not supported");
+                return;
+            }
 
-  const permission = await Notification.requestPermission();
-  if (permission === "granted") {
-    scheduleNextNotification();
-    alert("Daily reminders enabled ✅");
-  }
-});
+            const permission = await Notification.requestPermission();
+            if (permission === "granted") {
+                scheduleNextNotification();
+                alert("Daily reminders enabled ✅");
+            }
+        });
 
-/* -----------------------------
-   Random Daily Time Generator
------------------------------- */
-function getRandomTime() {
-  const now = new Date();
-  const minHour = 9;
-  const maxHour = 21;
+        /* -----------------------------
+           Random Daily Time Generator
+        ------------------------------ */
+        function getRandomTime() {
+            const now = new Date();
+            const minHour = 9;
+            const maxHour = 21;
 
-  const hour = Math.floor(Math.random() * (maxHour - minHour)) + minHour;
-  const minute = Math.floor(Math.random() * 60);
+            const hour = Math.floor(Math.random() * (maxHour - minHour)) + minHour;
+            const minute = Math.floor(Math.random() * 60);
 
-  const target = new Date();
-  target.setHours(hour, minute, 0, 0);
+            const target = new Date();
+            target.setHours(hour, minute, 0, 0);
 
-  if (target < now) {
-    target.setDate(target.getDate() + 1);
-  }
+            if (target < now) {
+                target.setDate(target.getDate() + 1);
+            }
 
-  return target.getTime();
-}
+            return target.getTime();
+        }
 
-/* -----------------------------
-   Schedule Notification
------------------------------- */
-function scheduleNextNotification() {
-  const time = getRandomTime();
-  localStorage.setItem("nextNotificationTime", time);
-}
+        /* -----------------------------
+           Schedule Notification
+        ------------------------------ */
+        function scheduleNextNotification() {
+            const time = getRandomTime();
+            localStorage.setItem("nextNotificationTime", time);
+        }
 
-/* -----------------------------
-   Show Notification
------------------------------- */
-function showNotification() {
-  navigator.serviceWorker.ready.then(registration => {
-    registration.showNotification("Habit Reminder 💪", {
-      body: "Log your habits and keep your streak alive!",
-      icon: "/icons/icon-192.png",
-      badge: "/icons/icon-192.png",
-      vibrate: [100, 50, 100]
-    });
-  });
-}
+        /* -----------------------------
+           Show Notification
+        ------------------------------ */
+        function showNotification() {
+            navigator.serviceWorker.ready.then(registration => {
+                registration.showNotification("Habit Reminder 💪", {
+                    body: "Log your habits and keep your streak alive!",
+                    icon: "/icons/icon-192.png",
+                    badge: "/icons/icon-192.png",
+                    vibrate: [100, 50, 100]
+                });
+            });
+        }
 
-/* -----------------------------
-   Check Loop (every minute)
------------------------------- */
-setInterval(() => {
-  const nextTime = localStorage.getItem("nextNotificationTime");
-  if (!nextTime) return;
+        /* -----------------------------
+           Check Loop (every minute)
+        ------------------------------ */
+        setInterval(() => {
+            const nextTime = localStorage.getItem("nextNotificationTime");
+            if (!nextTime) return;
 
-  if (Date.now() >= Number(nextTime)) {
-    showNotification();
-    scheduleNextNotification();
-  }
-}, 60000);
+            if (Date.now() >= Number(nextTime)) {
+                showNotification();
+                scheduleNextNotification();
+            }
+        }, 60000);
+
+        function setMonthlyGoal() {
+            const goalInput = document.getElementById('monthlyGoalInput');
+            const goalValue = parseInt(goalInput.value);
+            if (isNaN(goalValue) || goalValue < 0) {
+                alert('Please enter a valid non-negative number for the monthly goal.');
+                return;
+            }
+            localStorage.setItem('monthly_goal', goalValue.toString());
+            // refresh page to update goal display
+            location.reload();
+        }
 
     </script>
     <script data-name="BMC-Widget" data-cfasync="false" src="https://cdnjs.buymeacoffee.com/1.0.0/widget.prod.min.js"
         data-id="bosco98123u" data-description="Support me on Buy me a coffee!" data-message="" data-color="#5F7FFF"
         data-position="Right" data-x_margin="18" data-y_margin="18"></script>
-    
+
     <!-- add "fixed" for floating footer -->
     <footer class=" bottom-4 left-0 w-full flex justify-center pointer-events-none">
-        <nav class="pointer-events-auto bg-white/90 backdrop-blur shadow-sm border border-slate-200 rounded-full px-6 py-2 flex gap-4 text-xs font-semibold text-slate-600">
+        <nav
+            class="pointer-events-auto bg-white/90 backdrop-blur shadow-sm border border-slate-200 rounded-full px-6 py-2 flex gap-4 text-xs font-semibold text-slate-600">
             <a href="about.html" class="hover:text-blue-600 transition">About</a>
             <span class="text-slate-300">•</span>
             <a href="privacy.html" class="hover:text-blue-600 transition">Privacy</a>
