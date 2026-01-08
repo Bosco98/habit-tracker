@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Habit Progress Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.4.4/lz-string.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #fcfdfc;
+            color: #334155;
+        }
+
+        h1,
+        .display-font {
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+
+        .stat-card {
+            background: #ffffff;
+            border: 1px solid #f1f5f9;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03), 0 2px 4px -1px rgba(0, 0, 0, 0.02);
+            border-radius: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .stat-card-main {
+            border: 1px solid #dbeafe;
+            box-shadow: 0 20px 25px -5px rgba(219, 234, 254, 0.3), 0 8px 10px -6px rgba(219, 234, 254, 0.2);
+            background: linear-gradient(to bottom, #ffffff, #f0f7ff);
+        }
+
+        .accent-line {
+            height: 4px;
+            width: 40px;
+            background-color: #2563eb;
+            border-radius: 2px;
+            margin-top: 1rem;
+        }
+
+        #capture-area {
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto;
+            position: relative;
+            background-color: #fcfdfc;
+        }
+
+        .capturing .stat-card {
+            box-shadow: none !important;
+            border: 1px solid #e2e8f0 !important;
+        }
+
+        .btn-primary {
+            background-color: #dbeafe;
+            color: #1e40af;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: #bfdbfe;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background-color: #334155;
+            transition: all 0.2s ease;
+        }
+
+        .btn-secondary:hover {
+            background-color: #1e293b;
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+
+<body>
+    <header class="bg-white border-b border-slate-200">
+        <div class="max-w-4xl mx-auto px-6 py-5">
+
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+
+                <!-- Left: Title -->
+                <div class="flex flex-col gap-1">
+                    <a href="index.html"
+                        class="w-fit text-xs font-semibold text-blue-600 hover:text-blue-700 uppercase tracking-wider transition">
+                        ← Back to App
+                    </a>
+
+                    <h1 class="text-3xl font-bold text-slate-900">Shareables</h1>
+                    <p class="text-sm text-slate-500">Let the world know</p>
+                </div>
+
+                <!-- Right: Actions -->
+                <div class="flex items-center gap-3">
+
+                    <!-- Copy -->
+                    <button onclick="copyShareUrl()"
+                        class="group relative inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-400 transition focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+                        </svg>
+                        Copy
+
+                        <!-- Tooltip -->
+                        <span
+                            class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-slate-800 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 transition pointer-events-none whitespace-nowrap">
+                            Experimental feature
+                        </span>
+                    </button>
+
+                    <!-- Share (Primary) -->
+                    <button id="share-snapshot-btn" onclick="shareSnapshot()"
+                        class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
+                            <polyline points="16 6 12 2 8 6"></polyline>
+                            <line x1="12" y1="2" x2="12" y2="15"></line>
+                        </svg>
+                        <span id="share-btn-text">Share</span>
+                    </button>
+
+                </div>
+            </div>
+
+        </div>
+    </header>
+
+    <div class="max-w-4xl mx-auto px-6 pt-8 pb-0">
+        <div class="bg-gradient-to-r from-slate-50 to-blue-50 border border-slate-200 rounded-2xl p-8 shadow-sm">
+            <p id="motivational-quote"
+                class="text-slate-600 text-base md:text-lg font-normal text-center leading-relaxed italic"></p>
+        </div>
+    </div>
+
+    <div class="px-6 pb-6 pt-2 md:px-12 md:pb-12 md:pt-4 min-h-screen">
+        <div id="capture-area" class="space-y-8 p-4 md:p-8 rounded-3xl">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 items-center">
+                <div class="stat-card p-6 md:col-span-1 min-h-[160px]">
+                    <span class="text-slate-400 text-[9px] font-bold uppercase tracking-[0.2em] block mb-2">XP
+                        Balance</span>
+                    <p id="total-xp" class="text-3xl font-medium text-slate-700 display-font">0</p>
+                </div>
+
+                <div class="stat-card stat-card-main p-10 md:col-span-2 min-h-[220px] ring-1 ring-blue-50">
+                    <span class="text-blue-600 text-[10px] font-bold uppercase tracking-[0.3em] block mb-4">Target
+                        Completion</span>
+                    <p id="goal-percent" class="text-6xl font-semibold text-blue-800 display-font tracking-tight">0%</p>
+                    <p id="goal-raw" class="text-[10px] text-slate-400 mt-4 font-bold uppercase tracking-wider"></p>
+                    <div class="accent-line"></div>
+                </div>
+
+                <div class="stat-card p-6 md:col-span-1 min-h-[160px]">
+                    <span
+                        class="text-slate-400 text-[9px] font-bold uppercase tracking-[0.2em] block mb-2 text-center">Total
+                        Logs</span>
+                    <p id="habit-count" class="text-3xl font-medium text-slate-700 display-font">0</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="stat-card p-8 block w-full">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Aptitude Map</h2>
+                        <span class="h-2 w-2 rounded-full bg-blue-400 animate-pulse"></span>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="radarChart"></canvas>
+                    </div>
+                </div>
+                <div class="stat-card p-8 block w-full">
+                    <h2 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-6 text-left">Daily
+                        Impact
+                        Distribution</h2>
+                    <div class="chart-container">
+                        <canvas id="barChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div id="action-buttons" class="flex flex-wrap justify-center gap-4 py-4">
+
+            </div>
+        </div>
+
+        <div id="toast"
+            class="fixed bottom-8 left-1/2 -translate-x-1/2 bg-slate-800 text-white px-6 py-3 rounded-full shadow-2xl opacity-0 transition-all duration-300 pointer-events-none transform translate-y-4 text-xs font-bold z-50">
+            Message
+        </div>
+    </div>
+
+    <script>
+        Chart.defaults.font.family = "'Inter', sans-serif";
+        Chart.defaults.color = "#94a3b8";
+        Chart.defaults.scale.grid.color = "#f1f5f9";
+
+        const quotesByPerformance = {
+            euphoric: [
+                "You are transcending limits. Pure divinity in motion.",
+                "Symmetry, progress, perfection. You've become the standard.",
+                "The atmosphere itself bows to your momentum."
+            ],
+            polarizing: [
+                "Mediocrity is a choice you are dangerously close to making.",
+                "Is this the 'effort' they talk about in those motivational videos?",
+                "Statistics don't lie, but your excuses certainly do."
+            ],
+            gaslighting: [
+                "You actually thought you were doing well today, didn't you?",
+                "The data suggests you've been working, but your results say otherwise.",
+                "Are you sure you remembered to log correctly? This looks... concerning.",
+                "You're not tired. You're just bored of being average. Try harder."
+            ]
+        };
+
+        function getLocalData() {
+            try {
+                return {
+                    logs: JSON.parse(localStorage.getItem('habit_logs') || '{}'),
+                    template: JSON.parse(localStorage.getItem('habit_template') || '[]'),
+                    goal: parseInt(localStorage.getItem('monthly_goal') || '3000')
+                };
+            } catch (e) { return { logs: {}, template: [], goal: 3000 }; }
+        }
+
+        function checkUrlParams() {
+            const shared = new URLSearchParams(window.location.search).get('data');
+            if (shared) {
+                try { return JSON.parse(LZString.decompressFromEncodedURIComponent(shared)); }
+                catch (e) { console.error("Data error"); }
+            }
+            return null;
+        }
+
+        const appData = checkUrlParams() || getLocalData();
+
+        function processStats() {
+            let totalXP = 0;
+            let logCount = 0;
+            const habitFreq = {};
+            appData.template.forEach(h => habitFreq[h.id] = 0);
+
+            Object.entries(appData.logs).forEach(([key, val]) => {
+                const habitId = key.split('-').pop();
+                const habitDef = appData.template.find(h => h.id === habitId);
+                if (habitDef) {
+                    const isVice = habitDef.name.startsWith('~');
+                    const multiplier = isVice ? -1 : 1;
+                    totalXP += (habitDef.xp * multiplier);
+                    habitFreq[habitId] += multiplier;
+                    logCount++;
+                }
+            });
+            return { totalXP, habitFreq, logCount };
+        }
+
+        const stats = processStats();
+        const avgXp = appData.template.reduce((acc, curr) => acc + curr.xp, 0) / (appData.template.length || 1);
+        const targetFreqPerHabit = (appData.goal / (avgXp || 1)) / (appData.template.length || 1);
+
+        document.getElementById('total-xp').innerText = stats.totalXP.toLocaleString();
+        document.getElementById('habit-count').innerText = stats.logCount;
+        const progress = appData.goal > 0 ? Math.round((stats.totalXP / appData.goal) * 100) : 0;
+        document.getElementById('goal-percent').innerText = progress + '%';
+        document.getElementById('goal-raw').innerText = `${stats.totalXP} / ${appData.goal} UNITS`;
+
+        let quotePool;
+        if (progress >= 80) quotePool = quotesByPerformance.euphoric;
+        else if (progress >= 40) quotePool = quotesByPerformance.polarizing;
+        else quotePool = quotesByPerformance.gaslighting;
+
+        document.getElementById('motivational-quote').innerText = `"${quotePool[Math.floor(Math.random() * quotePool.length)]}"`;
+
+        function initCharts() {
+            new Chart(document.getElementById('radarChart'), {
+                type: 'radar',
+                data: {
+                    labels: appData.template.map(h => h.name),
+                    datasets: [
+                        {
+                            label: 'Current Status',
+                            data: appData.template.map(h => stats.habitFreq[h.id]),
+                            backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                            borderColor: '#2563eb',
+                            borderWidth: 2,
+                            pointBackgroundColor: '#1e40af',
+                            pointRadius: 3
+                        },
+                        {
+                            label: 'Baseline',
+                            data: appData.template.map(() => targetFreqPerHabit),
+                            backgroundColor: 'transparent',
+                            borderColor: '#e2e8f0',
+                            borderWidth: 1,
+                            borderDash: [4, 4],
+                            pointRadius: 0
+                        }
+                    ]
+                },
+                options: {
+                    animation: false,
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            grid: { color: '#f1f5f9' },
+                            angleLines: { color: '#f1f5f9' },
+                            pointLabels: { font: { size: 9, weight: '500' }, color: '#94a3b8' },
+                            ticks: { display: false },
+                            suggestedMin: 0
+                        }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+
+            new Chart(document.getElementById('barChart'), {
+                type: 'bar',
+                data: {
+                    labels: appData.template.map(h => h.name),
+                    datasets: [{
+                        data: appData.template.map(h => stats.habitFreq[h.id] * h.xp),
+                        backgroundColor: (ctx) => ctx.raw >= 0 ? '#2563eb' : '#f43f5e',
+                        borderRadius: 6,
+                        barThickness: 20
+                    }]
+                },
+                options: {
+                    animation: false,
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: {
+                            border: { display: false },
+                            grid: { color: '#f8fafc' },
+                            ticks: { font: { size: 9 } }
+                        },
+                        x: {
+                            border: { display: false },
+                            grid: { display: false },
+                            ticks: { font: { size: 9, weight: '500' } }
+                        }
+                    }
+                }
+            });
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.innerText = msg;
+            toast.style.opacity = '1';
+            toast.style.transform = 'translate(-50%, 0)';
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translate(-50%, 1rem)';
+            }, 3000);
+        }
+
+        function copyShareUrl() {
+            try {
+                const compressed = LZString.compressToEncodedURIComponent(JSON.stringify(appData));
+                const url = `${window.location.origin}${window.location.pathname}?data=${compressed}`;
+                const el = document.createElement('textarea');
+                el.value = url;
+                document.body.appendChild(el);
+                el.select();
+                document.execCommand('copy');
+                document.body.removeChild(el);
+                showToast("Link Copied to Clipboard");
+            } catch (e) {
+                showToast("Failed to copy link.");
+            }
+        }
+
+        async function shareSnapshot() {
+            const btn = document.getElementById('share-snapshot-btn');
+            const btnText = document.getElementById('share-btn-text');
+            const originalText = btnText.innerText;
+            const area = document.getElementById('capture-area');
+            const actionBtns = document.getElementById('action-buttons');
+
+            if (!area) return;
+
+            btnText.innerText = "Exporting...";
+            btn.disabled = true;
+            document.body.classList.add('capturing');
+            actionBtns.style.visibility = 'hidden';
+
+            try {
+                await new Promise(r => requestAnimationFrame(r));
+                const canvas = await html2canvas(area, {
+                    backgroundColor: '#fcfdfc',
+                    scale: 3,
+                    logging: false,
+                    useCORS: true,
+                    onclone: (clonedDoc) => {
+                        const clonedBtns = clonedDoc.getElementById('action-buttons');
+                        if (clonedBtns) clonedBtns.style.display = 'none';
+                    }
+                });
+
+                actionBtns.style.visibility = 'visible';
+                document.body.classList.remove('capturing');
+                const dataUrl = canvas.toDataURL('image/png');
+
+                if (navigator.share && navigator.canShare) {
+                    const blob = await (await fetch(dataUrl)).blob();
+                    const file = new File([blob], `neural-report.png`, { type: 'image/png' });
+                    if (navigator.canShare({ files: [file] })) {
+                        await navigator.share({
+                            files: [file],
+                            title: 'Progress Report',
+                            text: `My current progress: ${stats.totalXP} XP`
+                        });
+                    } else {
+                        triggerDownload(dataUrl);
+                    }
+                } else {
+                    triggerDownload(dataUrl);
+                }
+            } catch (err) {
+                showToast("Export error");
+                actionBtns.style.visibility = 'visible';
+                document.body.classList.remove('capturing');
+            } finally {
+                btnText.innerText = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        function triggerDownload(url) {
+            const link = document.createElement('a');
+            link.download = `Grind-Report.png`;
+            link.href = url;
+            link.click();
+            showToast("Report Downloaded");
+        }
+
+        window.addEventListener('load', () => {
+            initCharts();
+            if (stats.totalXP > 0) {
+                setTimeout(() => {
+                    confetti({
+                        particleCount: 150,
+                        spread: 70,
+                        origin: { y: 0.6 },
+                        colors: ['#2563eb', '#bfdbfe', '#1e40af', '#ffffff'],
+                        disableForReducedMotion: true
+                    });
+                }, 500);
+            }
+        });
+    </script>
+</body>
+
+</html>
