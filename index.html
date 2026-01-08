@@ -1797,7 +1797,7 @@
 ------------------------------ */
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("/habit-tracker/service-worker.js");
+    navigator.serviceWorker.register("/service-worker.js");
   });
 }
 
@@ -1853,8 +1853,8 @@ function showNotification() {
   navigator.serviceWorker.ready.then(registration => {
     registration.showNotification("Habit Reminder 💪", {
       body: "Log your habits and keep your streak alive!",
-      icon: "/habit-tracker/icons/icon-192.png",
-      badge: "/habit-tracker/icons/icon-192.png",
+      icon: "/icons/icon-192.png",
+      badge: "/icons/icon-192.png",
       vibrate: [100, 50, 100]
     });
   });
