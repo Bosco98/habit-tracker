@@ -2,7 +2,7 @@
   "name": "Habit Tracker",
   "short_name": "Habits",
   "description": "Gamified habit tracker to build good habits",
-  "start_url": "/habit-tracker/",
+  "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#c9f0cb",
