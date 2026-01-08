@@ -1,10 +1,10 @@
 const CACHE_NAME = "habit-tracker-v1";
 const ASSETS = [
-  "/habit-tracker/",
-  "/habit-tracker/index.html",
-  "/habit-tracker/manifest.json",
-  "/habit-tracker/icons/icon-192.png",
-  "/habit-tracker/icons/icon-512.png"
+  "/",
+  "/index.html",
+  "/manifest.json",
+  "/icons/icon-192.png",
+  "/icons/icon-512.png"
 ];
 
 self.addEventListener("install", event => {
