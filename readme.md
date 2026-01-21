@@ -1,58 +1,40 @@
-# Habit Tracker (Google Sheets Sync)
+# Habit Tracker - Next.js
 
-Browser-based habit tracker with local persistence, vice handling, rich analytics, and optional Google Sheets synchronization.
+A modern habit tracking application built with Next.js, TypeScript, shadcn UI, and Tailwind CSS. Track your daily habits, monitor streaks, analyze trends, and optionally sync with Google Sheets.
 
 ## Features
-- Sticky-grid monthly habit log with quick toggles
-- Positive habits earn XP; names prefixed with `~` are vices and deduct XP
-- Auto-calculated totals for XP, completion rate, and top performer
-- Six live dashboards (Chart.js):
-  - 📈 Daily XP Trend
-  - 📊 Consistency Bars
-  - 🎯 Habit Completion Rate
-  - 💰 XP Distribution (good habits vs. vices)
-  - 📅 Weekly Progress
-  - 🔥 Habit Streak Analysis
-- Modal-based Google Sheets setup with pull, push, and smart merge actions
-- Modal-based Google Sheets setup with pull, push, and smart merge actions
-- Cloud sync toggle with input validation (rejects malformed API keys)
-- Token reuse (~50 minutes) with automatic refresh before expiry
+
+### Core Functionality
+- **Interactive Habit Grid**: Track habits across the month with a visual grid
+- **XP System**: Earn points for good habits, lose points for vices (habits prefixed with `~`)
+- **Statistics Dashboard**: View your progress with comprehensive stats
+- **Analytics & Insights**: Six comprehensive chart visualizations
+
+### Google Sheets Integration
+- **Cloud Sync**: Optionally sync your habits to Google Sheets
+- **Bidirectional Sync**: Pull, push, or smart merge your data
+- **Multi-Sheet Support**: Switch between different spreadsheets
+
+### Data Management
+- **Local Storage**: All data persists in your browser by default
+- **Import/Export**: Export to CSV or JSON, import previous backups
+- **Privacy-First**: No sign-up required
 
 ## Getting Started
-1. Clone or download the project.
-2. Open `index.html` in a modern browser (Chrome recommended).
-3. Habits, logs, and API credentials persist automatically in `localStorage`.
 
-### Supporting Pages
-- `about.html`: project story, principles, and roadmap.
-- `privacy.html`: data usage and control details.
-- `contact.html`: channels for support, ideas, and issue reports.
-
-## Google Sheets Setup
-1. In Google Cloud Console:
-   - Create a project
-   - Enable **Google Sheets API**
-   - Create OAuth 2.0 Client ID (Web) and an API key
-   - Add the app origin to **Authorized JavaScript origins**
-2. Open **Settings ⚙️** in the app and fill:
-   - API Key
-   - Client ID
-   - Spreadsheet ID (from the sheet URL)
-3. Click **Connect & Sync**, approve the OAuth prompt, then use:
-   - ↓ Pull from Sheets
-   - ↑ Push to Sheets
-   - ⟳ Smart Merge Sync
-
-> Tip: Maintain separate spreadsheets per month and switch IDs via the settings modal.
-
-## Usage Notes
-- Add habits normally (e.g., `Exercise`); add vices with a leading `~` (e.g., `~Smoking`).
-- Habit names must be unique (case-insensitive, ignoring the optional `~` prefix); duplicates are blocked with a friendly alert.
-- The analytics tiles and charts refresh after every change or sync.
-- Removing a habit will also clear its historical logs and the corresponding row in Google Sheets on the next push.
-- **Clear All Logs** wipes the current month locally and syncs the blank state if connected.
+1. Install dependencies: `npm install`
+2. Run dev server: `npm run dev`
+3. Open http://localhost:3000
 
 ## Tech Stack
-- Tailwind CSS
-- Vanilla JS + Chart.js
-- Google API Client & Identity Services (OAuth 2.0)
+
+- Next.js 15 + TypeScript
+- Tailwind CSS + shadcn UI
+- Recharts for visualizations
+- Google Sheets API (optional)
+
+## Contact
+
+- Email: bosco98123@gmail.com
+- Twitter: @Bosco9806
+- GitHub: bosco98
