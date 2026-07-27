@@ -38,15 +38,27 @@ pnpm dev          # http://localhost:5173
 pnpm test         # unit tests (day math, streaks, duels, insights)
 pnpm build        # typecheck + production build + service worker
 pnpm e2e          # browser walkthrough against a running dev server
-pnpm desktop      # Tauri desktop app (needs Rust)
+pnpm desktop      # Electron desktop app (Vite + Electron, one command)
+pnpm desktop:build # package .dmg / .exe / AppImage
 ```
 
 `pnpm e2e` drives two independent accounts through sign-up, invite, shared check-ins,
-reactions and phrase-based device restore, and writes screenshots to `e2e-shots/`.
+reactions and phrase-based device restore. `pnpm e2e:desktop` boots the packaged
+Electron app and checks data survives a restart. Both write to `e2e-shots/`.
+
+### Desktop notes
+
+The shell serves the build over a custom `app://` scheme rather than `file://` — an
+opaque `file://` origin makes IndexedDB evictable, and for a local-first app that is
+data loss. It runs a strict CSP (no `unsafe-inline`; `wasm-unsafe-eval` for Jazz's
+crypto core), with `contextIsolation` on and `nodeIntegration` off.
+
+If you launch from a VS Code terminal, note that it exports `ELECTRON_RUN_AS_NODE=1`;
+`electron/dev.js` strips it, otherwise Electron boots as plain Node and no window opens.
 
 ### Stack
 
-Vite · React 19 · TypeScript · Tailwind v4 · shadcn/ui · GSAP · `jazz-tools` · Tauri v2
+Vite · React 19 · TypeScript · Tailwind v4 · shadcn/ui · GSAP · `jazz-tools` · Electron
 
 ### Layout
 

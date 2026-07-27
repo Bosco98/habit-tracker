@@ -1,0 +1,23 @@
+appId: com.bosco.habits
+productName: Habits
+directories:
+  output: release
+files:
+  - dist/**/*
+  - electron/**/*
+  - package.json
+mac:
+  category: public.app-category.healthcare-fitness
+  icon: public/icon-512.png
+  target:
+    - dmg
+    - zip
+win:
+  icon: public/icon-512.png
+  target: nsis
+linux:
+  icon: public/icon-512.png
+  category: Utility
+  target:
+    - AppImage
+    - deb

@@ -150,6 +150,24 @@
         inset 2px 2px 5px var(--shadow-dark);
 }
 
+/* Desktop shell: frameless on macOS, so make room for the traffic lights and
+   let the empty header area drag the window. Deliberately unlayered — these
+   must win over the header's Tailwind padding utilities. */
+.desktop-mac header {
+  padding-top: 1.75rem;
+  padding-left: 5.25rem;
+  -webkit-app-region: drag;
+}
+
+.desktop-mac header button,
+.desktop-mac header a {
+  -webkit-app-region: no-drag;
+}
+
+.desktop body {
+  overscroll-behavior: none;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
