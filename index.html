@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="description" content="A local-first, end-to-end encrypted habit tracker you can share with your people." />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Habits" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="theme-color" content="#f0eee9" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#232120" media="(prefers-color-scheme: dark)" />
+    <title>Habits</title>
+    <script>
+      // Paint the right theme before first frame — no flash on cold start.
+      (() => {
+        const stored = localStorage.getItem('habit-tracker-theme');
+        const dark =
+          stored === 'dark' ||
+          ((!stored || stored === 'system') &&
+            window.matchMedia('(prefers-color-scheme: dark)').matches);
+        if (dark) document.documentElement.classList.add('dark');
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
