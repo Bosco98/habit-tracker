@@ -3,11 +3,13 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
+import { externalizeCojsonWasm } from './build/externalize-wasm.js'
 
 // https://vite.dev/config/
 export default defineConfig({
   base: process.env.VITE_BASE ?? '/',
   plugins: [
+    externalizeCojsonWasm(),
     react(),
     tailwindcss(),
     VitePWA({
@@ -44,6 +46,19 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(import.meta.dirname, './src'),
+    },
+  },
+  build: {
+    // The sync engine is the bulk of the app and changes on its own cadence;
+    // splitting it keeps the UI chunk small and independently cacheable.
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (!id.includes('node_modules')) return
+          if (/jazz-tools|cojson/.test(id)) return 'jazz'
+          if (/[\\/](react|react-dom|react-router|scheduler)[\\/]/.test(id)) return 'vendor'
+        },
+      },
     },
   },
 })

@@ -37,28 +37,40 @@ pnpm install
 pnpm dev          # http://localhost:5173
 pnpm test         # unit tests (day math, streaks, duels, insights)
 pnpm build        # typecheck + production build + service worker
-pnpm e2e          # browser walkthrough against a running dev server
-pnpm desktop      # Electron desktop app (Vite + Electron, one command)
-pnpm desktop:build # package .dmg / .exe / AppImage
+pnpm e2e          # two-account walkthrough against a running dev server
+pnpm e2e:webkit   # production build in WebKit under the real desktop CSP
+pnpm desktop      # Tauri desktop app (needs Rust)
+pnpm desktop:build # package .dmg / .msi / AppImage
 ```
 
 `pnpm e2e` drives two independent accounts through sign-up, invite, shared check-ins,
-reactions and phrase-based device restore. `pnpm e2e:desktop` boots the packaged
-Electron app and checks data survives a restart. Both write to `e2e-shots/`.
+reactions and phrase-based device restore. `pnpm e2e:webkit` covers what Chromium
+can't: it serves `dist/` with the CSP read straight out of `tauri.conf.json` into
+Playwright's WebKit — the same engine family as the WKWebView the desktop app runs in.
+Both write screenshots to `e2e-shots/`.
 
-### Desktop notes
+### Desktop
 
-The shell serves the build over a custom `app://` scheme rather than `file://` — an
-opaque `file://` origin makes IndexedDB evictable, and for a local-first app that is
-data loss. It runs a strict CSP (no `unsafe-inline`; `wasm-unsafe-eval` for Jazz's
-crypto core), with `contextIsolation` on and `nodeIntegration` off.
+Tauri v2, so the app uses the OS webview instead of bundling a browser: the macOS
+build is a **4 MB DMG**. Electron was built first and dropped — its runtime alone is
+297 MB, which is indefensible for an app this size.
 
-If you launch from a VS Code terminal, note that it exports `ELECTRON_RUN_AS_NODE=1`;
-`electron/dev.js` strips it, otherwise Electron boots as plain Node and no window opens.
+The one non-obvious constraint: Jazz fetches its WASM crypto core from a `data:` URL,
+so the CSP needs `data:` in **connect-src**, not just `wasm-unsafe-eval` in
+`script-src`. Without it the window renders blank. There's no `unsafe-inline`
+anywhere — the theme-flash script lives in `public/theme-init.js` for that reason.
+
+### Bundle
+
+`build/externalize-wasm.ts` swaps cojson's base64 `data:` WASM module for the real
+`.wasm` binary it ships alongside. The loader only does `fetch(data)`, so a real
+asset URL is a drop-in — and it takes the sync chunk from 1,176 KB to 583 KB
+(420 → 153 KB gzipped), streams to the WASM compiler, and caches on its own.
+Routes past Home are lazy-loaded.
 
 ### Stack
 
-Vite · React 19 · TypeScript · Tailwind v4 · shadcn/ui · GSAP · `jazz-tools` · Electron
+Vite · React 19 · TypeScript · Tailwind v4 · shadcn/ui · GSAP · `jazz-tools` · Tauri v2
 
 ### Layout
 

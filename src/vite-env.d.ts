@@ -2,8 +2,8 @@
 
 declare global {
   interface Window {
-    /** Present only when running inside the Electron shell (see electron/preload.cjs). */
-    desktop?: { platform: NodeJS.Platform };
+    /** Injected by the Tauri shell; absent on the web. */
+    __TAURI_INTERNALS__?: Record<string, unknown>;
   }
 }
 

@@ -1,16 +1,18 @@
+/** True inside the Tauri desktop shell. */
 export const isDesktop = (): boolean =>
-  typeof window !== "undefined" && Boolean(window.desktop);
+  typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
+
+const isMac = (): boolean =>
+  typeof navigator !== "undefined" && /Mac/i.test(navigator.platform || navigator.userAgent);
 
 /**
- * Desktop gets a frameless window on macOS, so the shell needs room for the
+ * The desktop window is frameless on macOS, so the shell needs room for the
  * traffic lights and a draggable strip. Web keeps its normal header.
  */
 export function applyPlatformClasses(): void {
   if (!isDesktop()) return;
   document.documentElement.classList.add("desktop");
-  if (window.desktop?.platform === "darwin") {
-    document.documentElement.classList.add("desktop-mac");
-  }
+  if (isMac()) document.documentElement.classList.add("desktop-mac");
 }
 
 /**

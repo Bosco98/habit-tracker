@@ -33,3 +33,7 @@ e2e-shots
 *.njsproj
 *.sln
 *.sw?
+
+# Tauri
+src-tauri/target
+src-tauri/gen
