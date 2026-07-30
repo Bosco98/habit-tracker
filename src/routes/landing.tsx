@@ -97,7 +97,7 @@ export function Landing() {
                 </a>
               </div>
               <p className="text-muted-foreground mt-4 text-xs font-semibold">
-                Free to start · No ads in the app · macOS, Windows, and web
+                Free to start · No ads in the app · macOS and web
               </p>
             </div>
 
@@ -261,15 +261,15 @@ export function Landing() {
                   <Download className="size-4" /> macOS downloads
                 </a>
                 <a
-                  href={RELEASES_URL}
+                  href="/app"
                   className="stock stock-press active:stock-press-active flex h-12 items-center gap-2 rounded-lg bg-card px-5 text-sm font-black text-foreground"
                 >
-                  <Download className="size-4" /> Windows downloads
+                  Open web app <ArrowRight className="size-4" />
                 </a>
               </div>
               <p className="mt-3 text-xs font-bold">
-                Apple Silicon, Intel Mac, and Windows 10/11 installers are published
-                with each GitHub Release.
+                Apple Silicon and Intel Mac DMGs are published in GitHub Releases.
+                Windows is coming after a native Windows build is available.
               </p>
             </div>
           </div>

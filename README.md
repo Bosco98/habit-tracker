@@ -117,18 +117,14 @@ live under `/app`.
 
 ### Desktop releases
 
-Push a version tag to build and publish desktop installers:
+Desktop releases are built locally and uploaded to GitHub Releases:
 
 ```bash
-git tag v2.0.0
-git push origin v2.0.0
+pnpm tauri build --bundles dmg
+gh release create v2.0.0 src-tauri/target/release/bundle/dmg/Habits_2.0.0_aarch64.dmg
 ```
 
-The `Release desktop apps` workflow publishes DMGs for Apple Silicon and Intel Macs plus
-an NSIS installer for 64-bit Windows. It can also be started manually with a release tag
-from GitHub Actions.
-
-macOS builds use ad-hoc signing by default. For a publicly distributed, notarized build,
-configure `APPLE_CERTIFICATE`, `APPLE_CERTIFICATE_PASSWORD`, `APPLE_ID`,
-`APPLE_PASSWORD`, and `APPLE_TEAM_ID` as repository secrets. Windows installers are
-unsigned until a Windows code-signing setup is added.
+Build the Intel DMG with `--target x86_64-apple-darwin`. macOS builds use ad-hoc signing
+until a Developer ID distribution certificate and notarization credentials are
+configured. A Windows NSIS installer must be produced and verified on a Windows machine
+before it is added to a release.
