@@ -48,8 +48,21 @@ if (
   throw new Error("landing SEO metadata is incomplete");
 }
 await landing.screenshot({ path: `${SHOTS}/00-landing.png`, fullPage: true });
+await landing.goto(`${ORIGIN}/install/`, { waitUntil: "networkidle" });
+await landing
+  .getByRole("heading", { name: "Install Habits without the mystery." })
+  .waitFor();
+const installCoversBothPlatforms =
+  (await landing.getByRole("heading", { name: /Installing on Windows/ }).count()) ===
+    1 &&
+  (await landing.getByRole("heading", { name: /Choose the right installer/ }).count()) ===
+    1;
+if (!installCoversBothPlatforms) {
+  throw new Error("desktop install guide does not cover Mac and Windows");
+}
+await landing.screenshot({ path: `${SHOTS}/01-install-guide.png`, fullPage: true });
 await landingContext.close();
-log("Landing: headline, canonical, and CTAs verified");
+log("Landing: SEO, CTAs, and desktop install guide verified");
 
 // ── Device A: sign up, create habits, make a circle ───────────────────────
 const ctxA = await browser.newContext({

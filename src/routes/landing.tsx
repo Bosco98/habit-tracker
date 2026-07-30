@@ -56,6 +56,12 @@ export function Landing() {
               Download
             </a>
             <a
+              href="/install/"
+              className="text-muted-foreground hidden text-sm font-bold hover:text-foreground md:block"
+            >
+              Install help
+            </a>
+            <a
               href="/app"
               className="stock stock-press active:stock-press-active flex h-9 items-center gap-1.5 rounded-lg bg-card px-3 text-xs font-extrabold"
             >
@@ -265,6 +271,12 @@ export function Landing() {
                   className="stock stock-press active:stock-press-active flex h-12 items-center gap-2 rounded-lg bg-card px-5 text-sm font-black text-foreground"
                 >
                   Open web app <ArrowRight className="size-4" />
+                </a>
+                <a
+                  href="/install/"
+                  className="stock stock-press active:stock-press-active flex h-12 items-center gap-2 rounded-lg bg-card px-5 text-sm font-black text-foreground"
+                >
+                  Desktop install help
                 </a>
               </div>
               <p className="mt-3 text-xs font-bold">

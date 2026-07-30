@@ -13,6 +13,7 @@ import { DataProvider } from "@/data/provider";
 import { ThemeProvider } from "@/components/theme-provider";
 import { WidgetPanel } from "@/components/widget/widget-panel";
 import { AppRoutes } from "@/app-routes";
+import { InstallGuide } from "@/routes/install";
 import { Landing } from "@/routes/landing";
 
 applyPlatformClasses();
@@ -28,6 +29,14 @@ const appBase = base ? `${base}/app` : "/app";
 const webAppPath =
   window.location.pathname === appBase ||
   window.location.pathname.startsWith(`${appBase}/`);
+const installBase = base ? `${base}/install` : "/install";
+const installPath =
+  window.location.pathname === installBase ||
+  window.location.pathname.startsWith(`${installBase}/`);
+
+if (installPath) {
+  document.title = "How to Install Habits on Mac or Windows — Habits";
+}
 
 // Old invite links were rooted at the site apex. Preserve their fragments as
 // the public root becomes a landing page.
@@ -63,6 +72,8 @@ const view = widget ? (
   </DataProvider>
 ) : desktop || webAppPath || window.location.hash.length > 1 ? (
   appView
+) : installPath ? (
+  <InstallGuide />
 ) : (
   <Landing />
 );
