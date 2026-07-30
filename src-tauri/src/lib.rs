@@ -6,6 +6,7 @@ use tauri::{
     tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent},
     AppHandle, Manager, PhysicalPosition, Rect, WebviewWindow, WindowEvent,
 };
+#[cfg(target_os = "macos")]
 use tauri_plugin_autostart::MacosLauncher;
 
 const MAIN: &str = "main";
@@ -121,16 +122,16 @@ fn build_tray(app: &AppHandle) -> tauri::Result<()> {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    let autostart = tauri_plugin_autostart::Builder::new();
+    #[cfg(target_os = "macos")]
+    let autostart = autostart.macos_launcher(MacosLauncher::LaunchAgent);
+    let autostart = autostart.args(["--background"]).build();
+
     tauri::Builder::default()
         // Invite links open in the user's browser rather than hijacking the app window.
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_notification::init())
-        .plugin(
-            tauri_plugin_autostart::Builder::new()
-                .macos_launcher(MacosLauncher::LaunchAgent)
-                .args(["--background"])
-                .build(),
-        )
+        .plugin(autostart)
         .manage(habit_timer::HabitTimers::default())
         .manage(reminder::Reminder::default())
         .invoke_handler(tauri::generate_handler![
