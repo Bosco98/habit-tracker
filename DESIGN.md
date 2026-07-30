@@ -1,95 +1,149 @@
 # Design
 
-Mood: **"morning sun on soft clay"** — a molded, tactile surface warmed by amber light; optimistic, calm, physical. Neumorphic soft-UI done with discipline: depth in shadows, contrast in ink.
+Mood: **neobrutalist punch card** — pure white stock, a hard black rule, a row
+of bars you fill in by hand. Loud, flat, physical. The app counts days; the
+card *is* the count.
+
+Three attempts were rejected before this one. Neumorphism (too soft, too
+generic), then the same neobrutalist material in a clay/amber palette — twice —
+which read as brown and yellow. The material was never the problem; the colour
+was.
 
 ## Color
 
-Strategy: **Restrained** (product register) — clay-neutral surfaces + amber primary ≤10% of the surface + aubergine accent for social/competitive moments.
+**Pure black on white, electric accents.** Every neutral is chroma 0.
 
-All colors OKLCH. The surface is tinted because the material IS the brand (neumorphism), earning the tinted-bg exception.
+The clay/amber scheme from the first three attempts was rejected outright — a
+warm-tinted background plus an amber primary reads as **brown and yellow**, not
+neobrutalism. Do not reintroduce warm neutrals or yellow anywhere.
 
 ### Light (default)
 
 ```css
---background: oklch(0.945 0.008 91);   /* soft clay */
---well:       oklch(0.915 0.010 91);   /* recessed wells (inputs, tracks) */
---foreground: oklch(0.24 0.012 91);    /* ink — ≥10:1 on bg */
---muted-foreground: oklch(0.47 0.014 91); /* ≥4.5:1 on bg */
---primary:    oklch(0.80 0.155 88);    /* amber/honey — dark ink text on fills */
---primary-strong: oklch(0.68 0.14 80); /* deep honey for icons/strokes on bg */
---accent:     oklch(0.42 0.115 320);   /* aubergine — white text on fills */
---destructive: oklch(0.55 0.19 25);
---shadow-dark:  oklch(0.78 0.025 91);  /* neu shadow, lower-right */
---shadow-light: oklch(1 0 0);          /* neu highlight, upper-left */
+--background: oklch(0.96 0 0);   /* off-white field */
+--card:       oklch(1 0 0);      /* pure white stock */
+--foreground: oklch(0.15 0 0);
+--muted-foreground: oklch(0.45 0 0);
+--line:       oklch(0 0 0);      /* pure black rule / card edge */
+--stock-shadow: oklch(0 0 0);    /* hard offset, no blur */
+--hole:       oklch(0.92 0 0);
 ```
 
 ### Dark
 
 ```css
---background: oklch(0.235 0.010 91);   /* charcoal clay */
---well:       oklch(0.205 0.010 91);
---foreground: oklch(0.93 0.008 91);
---muted-foreground: oklch(0.70 0.010 91);
---primary:    oklch(0.80 0.155 88);    /* amber stays amber */
---primary-strong: oklch(0.82 0.15 88);
---accent:     oklch(0.72 0.11 320);    /* lifted aubergine */
---shadow-dark:  oklch(0.15 0.010 91);
---shadow-light: oklch(0.32 0.012 91);
+--background: oklch(0.17 0 0);
+--card:       oklch(0.24 0 0);   /* clearly lifted, so black shadow reads */
+--foreground: oklch(0.97 0 0);
+--line:       oklch(1 0 0);      /* pure white rule */
+--stock-shadow: oklch(0 0 0);    /* stays black in both themes */
+--hole:       oklch(0.14 0 0);
 ```
 
-Rules:
-- Amber fills (pale, L 0.80) carry **dark ink text**; aubergine fills carry **white text**.
-- Depth is never the only affordance — pressed states pair with icon/label change.
-- Semantic states: success = pressed-in + primary-strong check; error = `--destructive` text + icon, never a red glow.
+### Habit hues
 
-## Material (the neumorphic system)
-
-Three elevations, one material. Elements share the background color; depth comes only from dual shadows.
+Colour blocking is the style, not an accent. Six flat, electric hues, identical
+in both themes; each habit takes one **by list position** (a hash collides, and
+two neighbouring cards in one colour reads as a bug).
 
 ```css
-/* raised — resting interactive elements (cards, buttons) */
-.neu-raised  { box-shadow: -5px -5px 12px var(--shadow-light), 5px 5px 12px var(--shadow-dark); }
-/* pressed — active/done states (checked-in habit, active tab) */
-.neu-pressed { box-shadow: inset -4px -4px 8px var(--shadow-light), inset 4px 4px 8px var(--shadow-dark); }
-/* well — recessed containers (inputs, progress tracks, day strip) */
-.neu-well    { box-shadow: inset -2px -2px 5px var(--shadow-light), inset 2px 2px 5px var(--shadow-dark); }
+--hue-blue:   oklch(0.72 0.17 250);
+--hue-pink:   oklch(0.75 0.19 350);
+--hue-lime:   oklch(0.87 0.22 130);
+--hue-violet: oklch(0.72 0.18 300);
+--hue-red:    oklch(0.70 0.20 25);
+--hue-cyan:   oklch(0.82 0.14 200);
+--on-hue:     oklch(0.12 0 0);
 ```
 
-- Blur ≤ 12px, offset ≤ 6px — soft but crisp; never the 30px mush of 2020 neumorphism.
-- Cards radius 16px; circular check buttons; pills for chips/tags. Nothing above 16px on rectangles.
-- No borders on neumorphic elements (shadows are the edge); 1px hairline `--shadow-dark` allowed on flat lists only.
-- Focus-visible: 2px ring in `--primary-strong`, offset 2px — always visible, never replaced by depth.
+All six sit at L ≥ 0.70 so they always carry `--on-hue` near-black ink — text
+contrast never depends on which colour a habit drew. A habit's hue drives its
+header band, streak numeral, filled bars, today marker and done button.
+
+Rules:
+- The ink rule is the edge. No element relies on a shadow to be legible.
+- Anything on a colour band **inherits** its ink; `text-muted-foreground` on a
+  band vanishes in dark mode.
+- Errors are `--destructive` text and icon, never a coloured glow.
+
+## Material
+
+Neobrutalist: three primitives, all flat, none blurred.
+
+```css
+/* stock — a card sitting on the table */
+.stock      { background: var(--card); border: 2px solid var(--line);
+              box-shadow: 4px 4px 0 var(--stock-shadow); }
+/* pressing it down onto its own shadow is the interaction */
+.stock-press-active { transform: translate(4px, 4px); box-shadow: 0 0 0; }
+/* tear — the dashed rule across a ticket */
+.tear       { border-top: 2px dashed var(--line-soft); }
+```
+
+- **Blur is 0 everywhere.** Depth is a second sheet behind the first, not fog.
+- Radius: cards 12px, chips/pills full, holes full. Nothing above 16px.
+- Every card carries a **2px ink border** — never a border plus a soft shadow.
+
+- Cards get a **±0.5° tilt** derived from their position, so a list reads as
+  cards dropped on a table rather than rows in a grid. Tilt is suppressed on
+  hover and for `prefers-reduced-motion`.
+- Focus-visible: 2px ring in `--primary-strong`, offset 2px.
+
+### Dark mode is the same material, not a muted one
+
+Shipped wrong once: a mid-grey border with a shadow barely darker than the
+background makes the hard offset **invisible** and the edges soft — generic dark
+UI, not neobrutalism. In dark the line goes **pure white** and the shadow stays
+**pure black**, which only reads because `--card` (0.24) sits clearly above
+`--background` (0.17). Never soften either to make dark "calmer".
+
+## The punch strip
+
+The signature element, and the reason the material fits the product.
+
+A habit shows **30 bars — one per retained day**, oldest left, today right.
+The 30-day retention window isn't a setting buried in preferences; it's the
+literal width of the card.
+
+These were 10px circles at 0.3 opacity in the first cut and read as a dotted
+divider. They only became data as full-height bars (`h-7`) with 2px rings.
+
+| State | Rendering |
+|---|---|
+| Done | filled in the habit's hue, 2px ink ring |
+| Partial (count/timer under goal) | hue mixed 50% toward `--hole` |
+| Due, not done | `--hole` fill, 2px ink ring |
+| Not due (off-cadence) | ink ring only, `--line-soft` |
+| Before the habit existed | a baseline tick (`scaleY(0.14)`), not an empty cell |
+| Today | extra 2px ring in the habit's hue |
+
+A logged day always shows as filled, even off-cadence — bonus effort is a fact,
+and hiding it made the strip look broken.
 
 ## Typography
 
-One family: **Geist Variable** (installed) for everything — headings, labels, data, body.
+One family: **Geist Variable**.
 
-- Fixed rem scale, ratio ~1.2: 12 / 14 (base) / 17 / 20 / 24 / 34 (streak numbers, tabular-nums).
-- Streak/duel numbers: weight 650, `font-variant-numeric: tabular-nums`.
-- Labels: weight 500; body: 400; no letter-spacing tricks below 20px.
+- Scale: 11 / 14 (base) / 17 / 20 / 28 / 52 (streak numerals).
+- Streak numbers: weight 900, `tabular-nums`, tracking −0.03em. Never tighter
+  than −0.04em.
+- Card titles and buttons: **uppercase, weight 800**. Labels: 600. Body: 400.
+- Body copy capped at 65ch.
+
+## Language
+
+No dates, ever. Days are named relatively — "Today", "Yesterday", "4 days ago" —
+and cadence reads as "Every 3 days". A streak is a count of **due days**, not a
+count of calendar days.
 
 ## Motion (GSAP)
 
-Motion conveys state; 150–250ms; `ease-out` exponential family (`power3.out`/`expo.out`). No bounce, no elastic.
+Motion conveys state; 140–260ms; `expo.out` / `power3.out`. No bounce.
 
-- **The press**: check-in transitions raised→pressed, ~180ms, with a 0.97 scale dip. The signature interaction.
-- **Streak tick**: number rolls up (GSAP counter) + a single flame pulse ≤400ms. Milestones (7/30/100) get a one-shot particle burst — the only celebration moment.
-- **List changes**: FLIP-style reorder/enter, 200ms, stagger ≤40ms.
-- No page-load choreography. Content is visible by default; motion enhances, never gates.
-- `prefers-reduced-motion`: all of the above become instant state swaps or ≤120ms crossfades.
-
-## Layout
-
-- Mobile-first single column, max-w-lg centered; bottom nav (Home · Insights · Circle) as a raised neu bar.
-- Day strip: horizontal well with 7 pressable day pucks.
-- Density: comfortable on Home (thumb targets ≥44px), denser on Insights.
-- Spacing rhythm: 4-based scale; sections separated by space, not dividers.
-
-## Components
-
-- **Habit card** (molecule): raised pill-card — emoji puck, name, streak flame + tabular number, kind-specific control on the right (check puck / stepper / timer).
-- **Check puck** (atom): 52px circle, raised→pressed on done; icon swaps ○→✓.
-- **Day puck** (atom): date in the day strip; today ringed in primary-strong; selected = pressed.
-- **Chips** (atom): soft-signal metadata (`backfilled`, `edited`, `11:58pm`) — muted pill, never red.
-- **Recap card** (organism, M4): screenshot-worthy weekly duel summary — the one place accent aubergine gets to be Committed.
-- Skeletons for remote/partner data; personal data never shows loading states.
+- **The punch**: the button translates onto its shadow (140ms) while the day's
+  bar fills. The signature interaction.
+- **Streak tick**: the numeral rolls up (GSAP counter). Milestones (7/30/100)
+  get one confetti-free stamp pulse — the only celebration.
+- **Card entry**: staggered ≤40ms, translate 8px + fade. Content is visible by
+  default; motion never gates it.
+- `prefers-reduced-motion`: all of the above collapse to instant state swaps.

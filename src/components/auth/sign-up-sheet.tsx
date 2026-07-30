@@ -19,7 +19,7 @@ interface SignUpSheetProps {
   onOpenChange: (open: boolean) => void;
 }
 
-const inputStyle = "neu-well rounded-xl border-0 bg-well shadow-none dark:bg-well";
+const inputStyle = "stock-flat rounded-lg bg-card shadow-none";
 
 /**
  * Two beats: name the account, then save the phrase. The phrase is the
@@ -77,7 +77,7 @@ export function SignUpSheet({ open, onOpenChange }: SignUpSheetProps) {
               <Button
                 onClick={close}
                 disabled={!saved}
-                className="neu-raised h-12 rounded-full text-base"
+                className="stock h-12 rounded-lg text-base"
               >
                 Done
               </Button>
@@ -108,7 +108,7 @@ export function SignUpSheet({ open, onOpenChange }: SignUpSheetProps) {
               <Button
                 type="submit"
                 disabled={busy}
-                className={cn("neu-raised h-12 rounded-full text-base", busy && "opacity-70")}
+                className={cn("stock h-12 rounded-lg text-base", busy && "opacity-70")}
               >
                 {busy ? "Creating…" : "Create account"}
               </Button>

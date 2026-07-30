@@ -42,141 +42,322 @@
     --color-well: var(--well);
     --color-social: var(--social);
     --color-primary-strong: var(--primary-strong);
-    --radius-sm: calc(var(--radius) * 0.6);
-    --radius-md: calc(var(--radius) * 0.8);
+    --color-line: var(--line);
+    --radius-sm: calc(var(--radius) * 0.5);
+    --radius-md: calc(var(--radius) * 0.75);
     --radius-lg: var(--radius);
-    --radius-xl: calc(var(--radius) * 1.4);
-    --radius-2xl: calc(var(--radius) * 1.8);
-    --radius-3xl: calc(var(--radius) * 2.2);
-    --radius-4xl: calc(var(--radius) * 2.6);
+    --radius-xl: calc(var(--radius) * 1.25);
+    --radius-2xl: calc(var(--radius) * 1.5);
 }
 
-/* "Morning sun on soft clay" — see DESIGN.md */
+/* Neobrutalism: pure black on white, electric accents. Every neutral is
+   chroma 0 — the previous clay/amber scheme read as brown and yellow. */
 :root {
-    --background: oklch(0.945 0.008 91);
-    --foreground: oklch(0.24 0.012 91);
-    --card: oklch(0.945 0.008 91);
-    --card-foreground: oklch(0.24 0.012 91);
-    --popover: oklch(0.965 0.008 91);
-    --popover-foreground: oklch(0.24 0.012 91);
-    --primary: oklch(0.8 0.155 88);
-    --primary-foreground: oklch(0.22 0.012 91);
-    --secondary: oklch(0.915 0.01 91);
-    --secondary-foreground: oklch(0.24 0.012 91);
-    --muted: oklch(0.915 0.01 91);
-    --muted-foreground: oklch(0.47 0.014 91);
-    --accent: oklch(0.9 0.012 91);
-    --accent-foreground: oklch(0.24 0.012 91);
-    --destructive: oklch(0.55 0.19 25);
-    --border: oklch(0.87 0.015 91);
-    --input: oklch(0.88 0.015 91);
-    --ring: oklch(0.68 0.14 80);
-    --chart-1: oklch(0.8 0.155 88);
-    --chart-2: oklch(0.68 0.14 80);
-    --chart-3: oklch(0.42 0.115 320);
-    --chart-4: oklch(0.56 0.09 320);
-    --chart-5: oklch(0.47 0.014 91);
-    --radius: 1rem;
-    --sidebar: oklch(0.945 0.008 91);
-    --sidebar-foreground: oklch(0.24 0.012 91);
-    --sidebar-primary: oklch(0.8 0.155 88);
-    --sidebar-primary-foreground: oklch(0.22 0.012 91);
-    --sidebar-accent: oklch(0.9 0.012 91);
-    --sidebar-accent-foreground: oklch(0.24 0.012 91);
-    --sidebar-border: oklch(0.87 0.015 91);
-    --sidebar-ring: oklch(0.68 0.14 80);
-    --well: oklch(0.915 0.01 91);
-    --social: oklch(0.42 0.115 320);
-    --primary-strong: oklch(0.68 0.14 80);
-    --shadow-light: oklch(1 0 0);
-    --shadow-dark: oklch(0.78 0.025 91);
+    --background: oklch(0.96 0 0);
+    --foreground: oklch(0.15 0 0);
+    --card: oklch(1 0 0);
+    --card-foreground: oklch(0.15 0 0);
+    --popover: oklch(1 0 0);
+    --popover-foreground: oklch(0.15 0 0);
+    --primary: oklch(0.72 0.17 250);
+    --primary-foreground: oklch(0.12 0 0);
+    --secondary: oklch(0.93 0 0);
+    --secondary-foreground: oklch(0.15 0 0);
+    --muted: oklch(0.93 0 0);
+    --muted-foreground: oklch(0.45 0 0);
+    --accent: oklch(0.9 0 0);
+    --accent-foreground: oklch(0.15 0 0);
+    --destructive: oklch(0.58 0.22 25);
+    --border: oklch(0 0 0);
+    --input: oklch(0 0 0);
+    --ring: oklch(0.55 0.2 255);
+    --chart-1: oklch(0.72 0.17 250);
+    --chart-2: oklch(0.75 0.19 350);
+    --chart-3: oklch(0.72 0.18 300);
+    --chart-4: oklch(0.87 0.22 130);
+    --chart-5: oklch(0.45 0 0);
+    --radius: 0.75rem;
+    --sidebar: oklch(0.96 0 0);
+    --sidebar-foreground: oklch(0.15 0 0);
+    --sidebar-primary: oklch(0.72 0.17 250);
+    --sidebar-primary-foreground: oklch(0.12 0 0);
+    --sidebar-accent: oklch(0.9 0 0);
+    --sidebar-accent-foreground: oklch(0.15 0 0);
+    --sidebar-border: oklch(0 0 0);
+    --sidebar-ring: oklch(0.55 0.2 255);
+    --well: oklch(0.93 0 0);
+    --social: oklch(0.72 0.18 300);
+    --primary-strong: oklch(0.55 0.2 255);
+
+    /* Card-stock material — hard edges, hard shadows, zero blur. */
+    --line: oklch(0 0 0);
+    --line-soft: oklch(0 0 0 / 0.3);
+    --stock-shadow: oklch(0 0 0);
+    --hole: oklch(0.92 0 0);
 }
 
+/* Dark mode is the same material, not a muted one: the line flips to pure
+   white and the shadow stays pure black, which only reads if the card sits
+   clearly above the background. Never soften either to make dark "calmer". */
 .dark {
-    --background: oklch(0.235 0.01 91);
-    --foreground: oklch(0.93 0.008 91);
-    --card: oklch(0.235 0.01 91);
-    --card-foreground: oklch(0.93 0.008 91);
-    --popover: oklch(0.275 0.01 91);
-    --popover-foreground: oklch(0.93 0.008 91);
-    --primary: oklch(0.8 0.155 88);
-    --primary-foreground: oklch(0.2 0.012 91);
-    --secondary: oklch(0.205 0.01 91);
-    --secondary-foreground: oklch(0.93 0.008 91);
-    --muted: oklch(0.205 0.01 91);
-    --muted-foreground: oklch(0.7 0.01 91);
-    --accent: oklch(0.29 0.012 91);
-    --accent-foreground: oklch(0.93 0.008 91);
-    --destructive: oklch(0.65 0.18 25);
-    --border: oklch(0.31 0.012 91);
-    --input: oklch(0.3 0.012 91);
-    --ring: oklch(0.82 0.15 88);
-    --chart-1: oklch(0.8 0.155 88);
-    --chart-2: oklch(0.82 0.15 88);
-    --chart-3: oklch(0.72 0.11 320);
-    --chart-4: oklch(0.6 0.1 320);
-    --chart-5: oklch(0.7 0.01 91);
-    --sidebar: oklch(0.235 0.01 91);
-    --sidebar-foreground: oklch(0.93 0.008 91);
-    --sidebar-primary: oklch(0.8 0.155 88);
-    --sidebar-primary-foreground: oklch(0.2 0.012 91);
-    --sidebar-accent: oklch(0.29 0.012 91);
-    --sidebar-accent-foreground: oklch(0.93 0.008 91);
-    --sidebar-border: oklch(0.31 0.012 91);
-    --sidebar-ring: oklch(0.82 0.15 88);
-    --well: oklch(0.205 0.01 91);
-    --social: oklch(0.72 0.11 320);
-    --primary-strong: oklch(0.82 0.15 88);
-    --shadow-light: oklch(0.32 0.012 91);
-    --shadow-dark: oklch(0.15 0.01 91);
+    --background: oklch(0.17 0 0);
+    --foreground: oklch(0.97 0 0);
+    --card: oklch(0.24 0 0);
+    --card-foreground: oklch(0.97 0 0);
+    --popover: oklch(0.24 0 0);
+    --popover-foreground: oklch(0.97 0 0);
+    --primary: oklch(0.72 0.17 250);
+    --primary-foreground: oklch(0.12 0 0);
+    --secondary: oklch(0.22 0 0);
+    --secondary-foreground: oklch(0.97 0 0);
+    --muted: oklch(0.22 0 0);
+    --muted-foreground: oklch(0.72 0 0);
+    --accent: oklch(0.3 0 0);
+    --accent-foreground: oklch(0.97 0 0);
+    --destructive: oklch(0.68 0.21 25);
+    --border: oklch(1 0 0);
+    --input: oklch(1 0 0);
+    --ring: oklch(0.75 0.16 250);
+    --chart-1: oklch(0.72 0.17 250);
+    --chart-2: oklch(0.75 0.19 350);
+    --chart-3: oklch(0.72 0.18 300);
+    --chart-4: oklch(0.87 0.22 130);
+    --chart-5: oklch(0.72 0 0);
+    --sidebar: oklch(0.17 0 0);
+    --sidebar-foreground: oklch(0.97 0 0);
+    --sidebar-primary: oklch(0.72 0.17 250);
+    --sidebar-primary-foreground: oklch(0.12 0 0);
+    --sidebar-accent: oklch(0.3 0 0);
+    --sidebar-accent-foreground: oklch(0.97 0 0);
+    --sidebar-border: oklch(1 0 0);
+    --sidebar-ring: oklch(0.75 0.16 250);
+    --well: oklch(0.22 0 0);
+    --social: oklch(0.72 0.18 300);
+    --primary-strong: oklch(0.75 0.16 250);
+
+    --line: oklch(1 0 0);
+    --line-soft: oklch(1 0 0 / 0.35);
+    --stock-shadow: oklch(0 0 0);
+    --hole: oklch(0.14 0 0);
 }
 
-/* Neumorphic material — depth in shadows, contrast in ink (DESIGN.md) */
-@utility neu-raised {
-    box-shadow:
-        -5px -5px 12px var(--shadow-light),
-        5px 5px 12px var(--shadow-dark);
+/* Habit hues — flat, electric, identical in both themes. All L >= 0.70 so
+   they always carry near-black ink. No yellow, no brown, no warm neutrals. */
+:root,
+.dark {
+    --hue-blue:   oklch(0.72 0.17 250);
+    --hue-pink:   oklch(0.75 0.19 350);
+    --hue-lime:   oklch(0.87 0.22 130);
+    --hue-violet: oklch(0.72 0.18 300);
+    --hue-cyan:   oklch(0.82 0.14 200);
+    --hue-red:    oklch(0.70 0.20 25);
+    --on-hue:     oklch(0.12 0 0);
 }
 
-@utility neu-pressed {
-    box-shadow:
-        inset -4px -4px 8px var(--shadow-light),
-        inset 4px 4px 8px var(--shadow-dark);
+/* ─── Card stock ───────────────────────────────────────────────────────────
+   Printed paper, not moulded clay: a hard ink rule and a hard offset shadow.
+   No blur anywhere — depth reads as a second sheet behind the first. */
+
+@utility stock {
+    background-color: var(--card);
+    border: 2px solid var(--line);
+    box-shadow: 4px 4px 0 var(--stock-shadow);
 }
 
-@utility neu-well {
+/** Interactive stock: presses down onto its own shadow. */
+@utility stock-press {
+    transition:
+        transform 140ms cubic-bezier(0.16, 1, 0.3, 1),
+        box-shadow 140ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@utility stock-press-active {
+    transform: translate(4px, 4px);
+    box-shadow: 0 0 0 var(--stock-shadow);
+}
+
+/** A flat ticket with no lift — for nested rows that must not float. */
+@utility stock-flat {
+    background-color: var(--card);
+    border: 2px solid var(--line);
+}
+
+/** The tear line across a ticket. */
+@utility tear {
+    border-top: 2px dashed var(--line-soft);
+}
+
+/* ─── Punch strip ──────────────────────────────────────────────────────────
+   30 bars, one per retained day. The retention window is the object.
+   These were circles at 10px and read as a dotted divider; they are now
+   full-height bars so the strip is legible as data from across the room. */
+
+@utility punch {
+    background-color: var(--hole);
+    box-shadow: inset 0 0 0 2px var(--line);
+}
+
+@utility punch-done {
+    background-color: var(--habit-hue, var(--primary));
+    box-shadow: inset 0 0 0 2px var(--line);
+}
+
+@utility punch-partial {
+    background-color: color-mix(in oklch, var(--habit-hue, var(--primary)) 50%, var(--hole));
+    box-shadow: inset 0 0 0 2px var(--line);
+}
+
+/** A day the cadence never asked for — ruled, never filled. */
+@utility punch-idle {
+    background-color: transparent;
+    box-shadow: inset 0 0 0 2px var(--line-soft);
+}
+
+/**
+ * Before the habit existed. Drawn as a baseline tick, not an empty cell —
+ * a new habit is mostly pre-history, and outlining all 29 of those made the
+ * strip read as a broken grid rather than "the record starts here".
+ */
+@utility punch-void {
+    background-color: transparent;
+    box-shadow: none;
+}
+
+/* Today's marker takes the habit's own colour — a fixed accent made a pink
+   card sprout a blue bar. */
+@utility punch-today {
     box-shadow:
-        inset -2px -2px 5px var(--shadow-light),
-        inset 2px 2px 5px var(--shadow-dark);
+        inset 0 0 0 2px var(--line),
+        0 0 0 2px var(--habit-hue, var(--primary-strong));
+}
+
+/* Numerals carry the weight in this system. */
+@utility tnum {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1;
+}
+
+/* Landing-only atmosphere: the product's printed-card material at billboard
+   scale. These remain decorative and never carry information. */
+.landing-orbit {
+  position: absolute;
+  border: 2px solid var(--line-soft);
+  border-radius: 999px;
+  pointer-events: none;
+}
+
+.landing-orbit-one {
+  width: min(52rem, 90vw);
+  height: min(52rem, 90vw);
+  top: -22rem;
+  right: -14rem;
+}
+
+.landing-orbit-two {
+  width: 18rem;
+  height: 18rem;
+  left: -8rem;
+  bottom: -5rem;
+  background: var(--chart-2);
+  border-color: var(--line);
+  opacity: 0.9;
+}
+
+.landing-download-dots {
+  position: absolute;
+  inset: 0 0 0 auto;
+  width: min(42%, 28rem);
+  background-image: radial-gradient(var(--line) 2px, transparent 2px);
+  background-size: 18px 18px;
+  opacity: 0.18;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .landing-note {
+    animation: landing-note-in 500ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+}
+
+@keyframes landing-note-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) rotate(3deg);
+  }
 }
 
 /* Desktop shell: frameless on macOS, so make room for the traffic lights and
-   let the empty header area drag the window. Deliberately unlayered — these
-   must win over the header's Tailwind padding utilities. */
-.desktop-mac header {
+   let the empty bar area drag the window. Deliberately unlayered — these must
+   win over the bar's Tailwind padding utilities.
+
+   Scoped to .app-bar, NOT to `header`: as a bare element selector this also hit
+   every habit card's colour band and the tray panel, indenting them 84px and
+   padding them 28px in the desktop app only. */
+.desktop-mac .app-bar {
   padding-top: 1.75rem;
-  padding-left: 5.25rem;
   -webkit-app-region: drag;
 }
 
-.desktop-mac header button,
-.desktop-mac header a {
+/* Below `md` there is no rail, so the traffic lights sit over the bar itself
+   and it has to indent around them. From `md` up they land in the rail. */
+@media (width < 48rem) {
+  .desktop-mac .app-bar {
+    padding-left: 5.25rem;
+  }
+}
+
+.desktop-mac .side-rail {
+  padding-top: 1.75rem;
+  -webkit-app-region: drag;
+}
+
+.desktop-mac .app-bar button,
+.desktop-mac .app-bar a,
+.desktop-mac .side-rail a,
+.desktop-mac .side-rail button {
   -webkit-app-region: no-drag;
+}
+
+/* The tray popover is its own frameless window with no traffic lights. */
+.widget .app-bar {
+  padding-top: 0;
+  padding-left: 0;
 }
 
 .desktop body {
   overscroll-behavior: none;
 }
 
+/* The tray popover is its own window — no shell chrome, no drag region.
+   The window is transparent so the card's rounded corners aren't boxed in. */
+.widget,
+.widget body {
+  overflow: hidden;
+  overscroll-behavior: none;
+  background: transparent;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
-    }
+  }
   body {
     @apply bg-background text-foreground;
     -webkit-tap-highlight-color: transparent;
-    }
+  }
   html {
     @apply font-sans;
-    }
+  }
+  h1, h2, h3 {
+    text-wrap: balance;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

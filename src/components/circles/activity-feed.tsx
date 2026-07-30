@@ -1,5 +1,5 @@
 import { activityKey, type ActivityItem, type ReactionSummary } from "@/data/activity";
-import { formatDay } from "@/lib/days";
+import { relativeDay, todayKey } from "@/lib/days";
 import { formatDuration } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
@@ -18,6 +18,8 @@ function describe(item: ActivityItem): string {
 }
 
 export function ActivityFeed({ items, reactions, onReact }: ActivityFeedProps) {
+  const today = todayKey();
+
   if (items.length === 0) {
     return (
       <p className="text-muted-foreground py-6 text-center text-sm">
@@ -34,11 +36,11 @@ export function ActivityFeed({ items, reactions, onReact }: ActivityFeedProps) {
         const alreadyReacted = reactions.mine.has(key);
 
         return (
-          <li key={item.key} className="neu-raised flex flex-col gap-2 rounded-2xl bg-card p-3">
+          <li key={item.key} className="stock flex flex-col gap-2 rounded-xl p-3">
             <div className="flex items-center gap-2">
               <span className="text-lg">{item.habit.emoji}</span>
               <p className="min-w-0 flex-1 truncate text-sm">
-                <span className={cn("font-medium", item.isMe && "text-primary-strong")}>
+                <span className={cn("font-semibold", item.isMe && "text-primary-strong")}>
                   {item.isMe ? "You" : item.memberName}
                 </span>{" "}
                 <span className="text-muted-foreground">
@@ -46,13 +48,13 @@ export function ActivityFeed({ items, reactions, onReact }: ActivityFeedProps) {
                 </span>
               </p>
               <span className="text-muted-foreground shrink-0 text-[11px]">
-                {formatDay(item.forDay, { month: "short", day: "numeric" })}
+                {relativeDay(item.forDay, today)}
               </span>
             </div>
 
             <div className="flex items-center gap-1.5">
               {(item.backfilled || item.edited) && (
-                <span className="text-muted-foreground bg-well rounded-full px-2 py-0.5 text-[11px]">
+                <span className="text-muted-foreground stock-flat rounded-full px-2 py-0.5 text-[11px]">
                   {item.backfilled ? "backfilled" : "edited"}
                 </span>
               )}
@@ -61,7 +63,7 @@ export function ActivityFeed({ items, reactions, onReact }: ActivityFeedProps) {
                 [...counts].map(([emoji, count]) => (
                   <span
                     key={emoji}
-                    className="neu-well rounded-full px-2 py-0.5 text-xs tabular-nums"
+                    className="stock-flat tnum rounded-full px-2 py-0.5 text-xs"
                   >
                     {emoji} {count}
                   </span>
@@ -74,7 +76,7 @@ export function ActivityFeed({ items, reactions, onReact }: ActivityFeedProps) {
                       type="button"
                       onClick={() => onReact(item, emoji)}
                       aria-label={`React ${emoji} to ${item.memberName}'s check-in`}
-                      className="neu-raised flex size-7 items-center justify-center rounded-full text-xs transition-shadow active:neu-pressed"
+                      className="stock stock-press active:stock-press-active flex size-7 items-center justify-center rounded-full text-xs"
                     >
                       {emoji}
                     </button>

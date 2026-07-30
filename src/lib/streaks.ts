@@ -1,143 +1,144 @@
-import { addDays, dayOfWeek, weekStart, type DayKey } from "./days";
-
-export type ScheduleSpec =
-  | { type: "daily" }
-  | { type: "weekdays"; days: readonly number[] }
-  | { type: "timesPerWeek"; perWeek: number };
+/**
+ * Strict streaks over a fixed cadence: a run of consecutive *due* days, all
+ * completed. One miss on a due day ends it; days that aren't due are skipped
+ * entirely and can never break anything.
+ *
+ * Only the retained window is readable, so a run that started before it is
+ * rejoined through the `Carry` summary — see retention.ts.
+ */
+import {
+  isDueDay,
+  previousDueDay,
+  type Cadence,
+} from "./cadence";
+import { addDays, daysBetween, type DayKey } from "./days";
+import { carryIsContiguous, retentionStart, type Carry } from "./retention";
 
 export interface StreakInput {
-  /** Days on which the goal was met. */
+  /** Due days completed, within the retained window only. */
   doneDays: ReadonlySet<DayKey>;
-  schedule: ScheduleSpec;
+  cadence: Cadence;
   today: DayKey;
-  /** Day the habit was created — streaks never look before it. */
+  /** Day the habit was created — the cadence grid is anchored here. */
   createdDay: DayKey;
-  /** 0 = Sunday, 1 = Monday. Only used by timesPerWeek. */
-  weekStartsOn: number;
+  /** Frozen summary of everything that aged out, or null. */
+  carry: Carry | null;
 }
 
-export interface Streak {
-  count: number;
-  unit: "days" | "weeks";
+/** Safety bound — the window is 30 days, so this is never reached in practice. */
+const MAX_STEPS = 400;
+
+/** Earliest day any derivation may look at. */
+function floorDay({ today, createdDay }: Pick<StreakInput, "today" | "createdDay">): DayKey {
+  const start = retentionStart(today);
+  return daysBetween(createdDay, start) >= 0 ? start : createdDay;
 }
 
-/** Safety bound: ~11 years of walking backwards. */
-const MAX_STEPS = 4000;
-
-function isScheduled(key: DayKey, schedule: ScheduleSpec): boolean {
-  if (schedule.type === "daily") return true;
-  if (schedule.type === "weekdays") return schedule.days.includes(dayOfWeek(key));
-  return true; // timesPerWeek handled week-wise, not day-wise
-}
-
-function doneInWeek(
-  start: DayKey,
-  doneDays: ReadonlySet<DayKey>,
-): number {
-  let count = 0;
-  for (let i = 0; i < 7; i++) {
-    if (doneDays.has(addDays(start, i))) count++;
+/** Due days from the floor up to `today`, oldest first. */
+function retainedDueDays(input: StreakInput): DayKey[] {
+  const { today, createdDay, cadence } = input;
+  const days: DayKey[] = [];
+  let day = floorDay(input);
+  for (let step = 0; step < MAX_STEPS && daysBetween(day, today) >= 0; step++) {
+    if (isDueDay(day, createdDay, cadence)) days.push(day);
+    day = addDays(day, 1);
   }
-  return count;
+  return days;
 }
 
 /**
- * Strict streak: one miss on a scheduled day (or an unmet week) breaks it.
- * Today (or the current week) is graced while still pending — an unmet
- * "now" doesn't break the streak until it's over.
+ * The live streak. A due day that is still today and still pending is graced —
+ * an unfinished "now" doesn't end a run until the day is over.
  */
-export function currentStreak(input: StreakInput): Streak {
-  return input.schedule.type === "timesPerWeek"
-    ? currentWeekStreak(input, input.schedule.perWeek)
-    : currentDayStreak(input);
-}
+export function currentStreak(input: StreakInput): number {
+  const { doneDays, cadence, today, createdDay, carry } = input;
+  const floor = floorDay(input);
 
-function currentDayStreak({
-  doneDays,
-  schedule,
-  today,
-  createdDay,
-}: StreakInput): Streak {
-  let count = 0;
-  let day = today;
-  // A still-pending today doesn't break the streak — start from yesterday.
-  if (isScheduled(today, schedule) && !doneDays.has(today)) {
-    day = addDays(day, -1);
+  let day = isDueDay(today, createdDay, cadence)
+    ? today
+    : previousDueDay(today, createdDay, cadence);
+  if (day === today && !doneDays.has(day)) {
+    day = previousDueDay(day, createdDay, cadence);
   }
-  for (let step = 0; step < MAX_STEPS && day >= createdDay; step++) {
-    if (isScheduled(day, schedule)) {
-      if (!doneDays.has(day)) break;
-      count++;
-    }
-    day = addDays(day, -1);
-  }
-  return { count, unit: "days" };
-}
 
-function currentWeekStreak(
-  { doneDays, today, createdDay, weekStartsOn }: StreakInput,
-  perWeek: number,
-): Streak {
   let count = 0;
-  const currentWeek = weekStart(today, weekStartsOn);
-  const firstWeek = weekStart(createdDay, weekStartsOn);
-  // The in-progress week counts if already met, and is graced otherwise.
-  if (doneInWeek(currentWeek, doneDays) >= perWeek) count++;
-  let week = addDays(currentWeek, -7);
-  for (let step = 0; step < MAX_STEPS && week >= firstWeek; step++) {
-    if (doneInWeek(week, doneDays) < perWeek) break;
+  for (let step = 0; step < MAX_STEPS; step++) {
+    if (day === null || daysBetween(floor, day) < 0) break;
+    if (!doneDays.has(day)) return count; // a real miss — carry can't apply
     count++;
-    week = addDays(week, -7);
+    day = previousDueDay(day, createdDay, cadence);
   }
-  return { count, unit: "weeks" };
+
+  // Walked the whole retained window unbroken. If there were due days below it,
+  // the run continues into the frozen summary.
+  const ranOffTheWindow = day !== null && daysBetween(floor, day) < 0;
+  if (ranOffTheWindow && carryIsContiguous(carry, today)) count += carry.streak;
+  return count;
 }
 
-/** Longest run ever, using the same strictness rules. */
-export function bestStreak(input: StreakInput): Streak {
-  return input.schedule.type === "timesPerWeek"
-    ? bestWeekStreak(input, input.schedule.perWeek)
-    : bestDayStreak(input);
+/** Longest run ever, under the same rules. */
+export function bestStreak(input: StreakInput): number {
+  const { doneDays, today, carry } = input;
+  let best = carry?.best ?? 0;
+  let run = carryIsContiguous(carry, today) ? carry.streak : 0;
+
+  for (const day of retainedDueDays(input)) {
+    if (doneDays.has(day)) {
+      run++;
+      if (run > best) best = run;
+    } else if (day !== today) {
+      run = 0; // a pending today never ends a run
+    }
+  }
+  return best;
 }
 
-function bestDayStreak({
+/** Due days completed in total, including everything already folded away. */
+export function totalDone(input: StreakInput): number {
+  const carried = input.carry?.totalDone ?? 0;
+  const retained = retainedDueDays(input).filter((day) => input.doneDays.has(day));
+  return carried + retained.length;
+}
+
+export interface CompactionInput {
+  previous: Carry | null;
+  /** Must cover every due day in (previous.throughDay, throughDay]. */
+  doneDays: ReadonlySet<DayKey>;
+  cadence: Cadence;
+  createdDay: DayKey;
+  throughDay: DayKey;
+}
+
+/**
+ * Fold the days that just aged out into the carry. Runs forward from where
+ * the previous carry stopped, so compaction is incremental and idempotent:
+ * compacting twice through the same day yields the same summary.
+ */
+export function compactCarry({
+  previous,
   doneDays,
-  schedule,
-  today,
+  cadence,
   createdDay,
-}: StreakInput): Streak {
-  let best = 0;
-  let run = 0;
-  let day = createdDay;
-  for (let step = 0; step < MAX_STEPS && day <= today; step++) {
-    if (isScheduled(day, schedule)) {
+  throughDay,
+}: CompactionInput): Carry {
+  if (previous && daysBetween(previous.throughDay, throughDay) <= 0) return previous;
+
+  let run = previous?.streak ?? 0;
+  let best = previous?.best ?? 0;
+  let done = previous?.totalDone ?? 0;
+
+  let day = previous ? addDays(previous.throughDay, 1) : createdDay;
+  for (let step = 0; step < MAX_STEPS && daysBetween(day, throughDay) >= 0; step++) {
+    if (isDueDay(day, createdDay, cadence)) {
       if (doneDays.has(day)) {
         run++;
+        done++;
         if (run > best) best = run;
-      } else if (day !== today) {
-        run = 0; // pending today never ends a run
+      } else {
+        run = 0;
       }
     }
     day = addDays(day, 1);
   }
-  return { count: best, unit: "days" };
-}
-
-function bestWeekStreak(
-  { doneDays, today, createdDay, weekStartsOn }: StreakInput,
-  perWeek: number,
-): Streak {
-  let best = 0;
-  let run = 0;
-  const currentWeek = weekStart(today, weekStartsOn);
-  let week = weekStart(createdDay, weekStartsOn);
-  for (let step = 0; step < MAX_STEPS && week <= currentWeek; step++) {
-    if (doneInWeek(week, doneDays) >= perWeek) {
-      run++;
-      if (run > best) best = run;
-    } else if (week !== currentWeek) {
-      run = 0; // the in-progress week never ends a run
-    }
-    week = addDays(week, 7);
-  }
-  return { count: best, unit: "weeks" };
+  return { throughDay, streak: run, best, totalDone: done };
 }

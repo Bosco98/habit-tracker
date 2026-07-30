@@ -1,5 +1,11 @@
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { useAccount } from "jazz-tools/react";
+import { todayKey } from "@/lib/days";
+import {
+  appendAchievementEvents,
+  deriveMissingAchievementEvents,
+} from "./achievements";
+import { compactAll } from "./compaction";
 import { AppAccount } from "./schema";
 import { accountResolve, type HabitEntry, type LoadedCircle, type LoadedHabit } from "./types";
 
@@ -39,4 +45,42 @@ export function useHabitEntries(
 
     return { personal, shared, circles };
   }, [account]);
+}
+
+/**
+ * Enforce the 30-day window. Runs once per day-key change per session; the
+ * job is idempotent, so a second device doing the same work costs nothing.
+ * Archived habits are compacted too — they still show a final streak.
+ */
+export function useRetention(account: ReturnType<typeof useAppAccount>): void {
+  const today = todayKey();
+
+  useEffect(() => {
+    if (!account.$isLoaded) return;
+    const habits: LoadedHabit[] = [
+      ...account.root.habits.filter((h): h is LoadedHabit => Boolean(h?.$isLoaded)),
+      ...account.root.circles.flatMap((circle) =>
+        circle?.$isLoaded
+          ? circle.habits.filter((h): h is LoadedHabit => Boolean(h?.$isLoaded))
+          : [],
+      ),
+    ];
+    compactAll(habits, account.$jazz.id, today);
+  }, [account, today]);
+}
+
+/**
+ * Persist compact receipts for anything visible inside the retained window.
+ * Deterministic keys make this safe on every device and after every sync.
+ */
+export function useAchievementEngine(
+  account: ReturnType<typeof useAppAccount>,
+): void {
+  const today = todayKey();
+
+  useEffect(() => {
+    if (!account.$isLoaded) return;
+    const missing = deriveMissingAchievementEvents(account, today);
+    if (missing.length > 0) appendAchievementEvents(account, missing);
+  }, [account, today]);
 }

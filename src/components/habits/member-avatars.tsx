@@ -26,7 +26,7 @@ export function MemberAvatars({ members, day }: MemberAvatarsProps) {
             title={`${stats.member.name}: ${done ? "done" : "not yet"}`}
             className={cn(
               "flex size-6 items-center justify-center rounded-full bg-background text-[10px] font-semibold",
-              done ? "neu-pressed text-primary-strong" : "neu-raised text-muted-foreground",
+              done ? "bg-primary text-primary-foreground" : "stock-flat text-muted-foreground",
             )}
           >
             {initials(stats.member.name)}

@@ -7,76 +7,60 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { StatTile } from "@/components/insights/stat-tile";
-import { PeerRow } from "./peer-row";
 import { habitStats } from "@/data/stats";
 import type { HabitEntry } from "@/data/types";
-import { lastNDays, todayKey, weekDays, weekStart } from "@/lib/days";
-import { runDuel } from "@/lib/duels";
-import { completionRate } from "@/lib/insights";
+import { describeCadence } from "@/lib/cadence";
+import { completionRate, momentum } from "@/lib/insights";
+import { RETENTION_DAYS, retentionWindow } from "@/lib/retention";
+import { PeerRow } from "./peer-row";
 
 interface HabitDetailSheetProps {
   entry: HabitEntry | null;
   myId: string;
   myName: string;
-  weekStartsOn: number;
   onOpenChange: (open: boolean) => void;
 }
-
-const WINDOW_DAYS = 28;
 
 /** Tap a habit → how everyone is actually doing, side by side. */
 export function HabitDetailSheet({
   entry,
   myId,
   myName,
-  weekStartsOn,
   onOpenChange,
 }: HabitDetailSheetProps) {
   const stats = useMemo(
-    () => (entry ? habitStats(entry, myId, myName, weekStartsOn) : null),
-    [entry, myId, myName, weekStartsOn],
+    () => (entry ? habitStats(entry, myId, myName) : null),
+    [entry, myId, myName],
   );
 
-  const window = useMemo(() => lastNDays(WINDOW_DAYS, todayKey()), []);
-  // The full week, matching the circle's duel scoring — one definition of a week.
-  const thisWeek = useMemo(
-    () => weekDays(weekStart(todayKey(), weekStartsOn)),
-    [weekStartsOn],
-  );
+  const view = useMemo(() => {
+    if (!stats) return null;
+    const window = retentionWindow(stats.today);
+    return {
+      window,
+      rate: completionRate(window, stats.me.doneDays, stats.createdDay, stats.cadence),
+      trend: momentum(stats.today, stats.me.doneDays, stats.createdDay, stats.cadence),
+    };
+  }, [stats]);
 
-  const duel = useMemo(() => {
-    if (!stats?.isShared) return null;
-    return runDuel(
-      stats.members.map((member) => ({
-        accountId: member.member.id,
-        doneDays: member.doneDays,
-        values: member.values,
-      })),
-      stats.schedule,
-      thisWeek,
-    );
-  }, [stats, thisWeek]);
+  if (!entry || !stats || !view) return null;
 
-  if (!entry || !stats) return null;
-
-  const leaderName =
-    duel && duel.winnerIds.length === 1
-      ? duel.winnerIds[0] === myId
-        ? "You're"
-        : `${stats.members.find((m) => m.member.id === duel.winnerIds[0])?.member.name ?? "Someone"} is`
-      : null;
+  const delta = Math.round(view.trend.delta * 100);
 
   return (
     <Sheet open={Boolean(entry)} onOpenChange={onOpenChange}>
-      <SheetContent side="bottom" className="mx-auto max-w-lg rounded-t-3xl border-0 bg-background">
+      <SheetContent
+        side="bottom"
+        className="mx-auto max-w-lg rounded-t-2xl border-x-0 border-b-0 bg-background"
+      >
         <SheetHeader>
           <SheetTitle className="flex items-center gap-2">
             <span className="text-xl">{entry.habit.emoji}</span>
             {entry.habit.name}
           </SheetTitle>
           <SheetDescription>
-            {entry.circle ? `Shared in ${entry.circle.name}` : "Personal habit"} · last{" "}
-            {WINDOW_DAYS} days
+            {entry.circle ? `Shared in ${entry.circle.name}` : "Personal habit"} ·{" "}
+            {describeCadence(stats.cadence).toLowerCase()} · last {RETENTION_DAYS} days
           </SheetDescription>
         </SheetHeader>
 
@@ -84,48 +68,37 @@ export function HabitDetailSheet({
           <div className="grid grid-cols-3 gap-2">
             <StatTile
               label={stats.isShared ? "Together" : "Streak"}
-              value={String(
-                stats.isShared ? stats.combinedStreak.count : stats.me.streak.count,
-              )}
-              hint={stats.me.streak.unit === "weeks" ? "weeks" : "days"}
+              value={String(stats.isShared ? stats.combinedStreak : stats.me.streak)}
+              hint="days"
             />
-            <StatTile label="Your best" value={String(stats.me.best.count)} hint="all time" />
+            <StatTile label="Your best" value={String(stats.me.best)} hint="days" />
             <StatTile
-              label="Last 4 weeks"
-              value={`${Math.round(
-                completionRate(window, stats.me.doneDays, stats.schedule) * 100,
-              )}%`}
+              label="Kept"
+              value={`${Math.round(view.rate * 100)}%`}
+              hint={delta === 0 ? "steady" : `${delta > 0 ? "+" : ""}${delta} pts`}
             />
           </div>
 
-          {duel && (
-            <div className="neu-well flex items-center justify-between rounded-2xl bg-well p-3">
-              <div>
-                <p className="text-sm font-medium">This week</p>
-                <p className="text-muted-foreground text-xs">
-                  {duel.winnerIds.length === 0
-                    ? "Nobody's on the board yet"
-                    : duel.isDraw
-                      ? "Dead even"
-                      : `${leaderName} ahead`}
-                </p>
-              </div>
-              <span className="text-social text-sm font-semibold tabular-nums">
-                {duel.ranked.map((score) => `${Math.round(score.completion * 100)}%`).join(" · ")}
-              </span>
-            </div>
-          )}
-
           <div className="flex flex-col gap-4">
+            {stats.isShared && (
+              <h3 className="text-muted-foreground text-xs font-semibold">Everyone</h3>
+            )}
             {stats.members.map((member) => (
               <PeerRow
                 key={member.member.id}
                 stats={member}
-                window={window}
-                schedule={stats.schedule}
+                window={view.window}
+                cadence={stats.cadence}
+                createdDay={stats.createdDay}
+                today={stats.today}
                 kind={entry.habit.kind}
                 goal={stats.goal}
-                completion={completionRate(window, member.doneDays, stats.schedule)}
+                completion={completionRate(
+                  view.window,
+                  member.doneDays,
+                  stats.createdDay,
+                  stats.cadence,
+                )}
               />
             ))}
           </div>

@@ -29,7 +29,8 @@ export function HabitMenu({
         <button
           type="button"
           aria-label={`Options for ${habitName}`}
-          className="text-muted-foreground -mr-1 flex size-8 shrink-0 items-center justify-center rounded-full transition-colors hover:text-foreground"
+          // Inherits the colour block's ink; a muted grey vanished on the dark card.
+          className="-mr-1 flex size-8 shrink-0 items-center justify-center rounded-full opacity-70 transition-opacity hover:opacity-100"
         >
           <MoreHorizontal className="size-4" />
         </button>

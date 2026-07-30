@@ -1,7 +1,11 @@
 /**
- * Day-key math. A DayKey is a local-timezone "YYYY-MM-DD" string.
- * All arithmetic goes through noon-anchored Dates so DST shifts can
- * never move a result across a day boundary.
+ * Day math. A DayKey is an opaque, sortable local-day identifier — it happens
+ * to be "YYYY-MM-DD" because something has to anchor a day boundary, but
+ * nothing above this module may take it apart. There are no weeks, no
+ * weekdays and no calendar dates in this app: everything is counted in days.
+ *
+ * All arithmetic goes through noon-anchored Dates so a DST shift can never
+ * move a result across a day boundary.
  */
 export type DayKey = string;
 
@@ -26,11 +30,6 @@ export function addDays(key: DayKey, n: number): DayKey {
   return toDayKey(date);
 }
 
-/** 0 = Sunday … 6 = Saturday. */
-export function dayOfWeek(key: DayKey): number {
-  return toNoonDate(key).getDay();
-}
-
 /** Signed whole days from `from` to `to`. */
 export function daysBetween(from: DayKey, to: DayKey): number {
   return Math.round(
@@ -38,24 +37,25 @@ export function daysBetween(from: DayKey, to: DayKey): number {
   );
 }
 
-/** First day of the week containing `key`. */
-export function weekStart(key: DayKey, weekStartsOn: number): DayKey {
-  return addDays(key, -((dayOfWeek(key) - weekStartsOn + 7) % 7));
-}
-
 /** The `n` day keys ending at (and including) `end`, oldest first. */
 export function lastNDays(n: number, end: DayKey): DayKey[] {
   return Array.from({ length: n }, (_, i) => addDays(end, i - (n - 1)));
 }
 
-/** The 7 days of the week beginning at `start`. */
-export function weekDays(start: DayKey): DayKey[] {
-  return Array.from({ length: 7 }, (_, i) => addDays(start, i));
+/**
+ * How a day is named to a human — always relative, never a date.
+ * "Today" · "Yesterday" · "4 days ago" · "in 3 days".
+ */
+export function relativeDay(day: DayKey, today: DayKey): string {
+  const delta = daysBetween(today, day);
+  if (delta === 0) return "Today";
+  if (delta === -1) return "Yesterday";
+  if (delta === 1) return "Tomorrow";
+  return delta < 0 ? `${-delta} days ago` : `in ${delta} days`;
 }
 
-export function formatDay(
-  key: DayKey,
-  options: Intl.DateTimeFormatOptions,
-): string {
-  return toNoonDate(key).toLocaleDateString(undefined, options);
+/** Compact form for dense strips: "0" is today, counting backwards. */
+export function dayOffsetLabel(day: DayKey, today: DayKey): string {
+  const delta = daysBetween(day, today);
+  return delta === 0 ? "now" : `-${delta}`;
 }

@@ -20,12 +20,27 @@ habits with a partner or a small circle and let the weekly duel sort out who buy
 
 ## Habits
 
-Three kinds — **check**, **count** (8 glasses), **timer** (20 minutes) — each on a schedule:
-daily, specific weekdays, or N times a week.
+Three kinds — **check**, **count** (8 glasses), **timer** (20 minutes) — each on a
+**cadence**: due every N days, on a fixed grid anchored at the day it was created.
 
-Streaks are **strict**: miss a scheduled day and it's gone. Unscheduled days aren't misses,
-and a still-pending today is graced rather than counted against you. Shared habits also
-carry a *combined* streak that survives only while **everyone** delivers.
+There are no dates in this app and no weekdays. Days are counted, never named: "4 days
+ago", "every 3 days". Missing a due day breaks the streak but does **not** shift the next
+one.
+
+Streaks are **strict** and count *due days*: skip one and it's gone. Off-cadence days
+aren't misses, and a still-pending today is graced rather than counted against you. Shared
+habits also carry a *combined* streak that survives only while **everyone** delivers.
+Duels run on fixed 7-day **rounds** counted from the habit's first day.
+
+### 30 days, and no more
+
+Only the last **30 days** of raw history are readable — the punch strip on each card is
+literally that window. Jazz CoFeeds are append-only (`push` only, no delete), so retention
+isn't deletion: aged-out days are folded once into a small per-account `Carry`
+(`{throughDay, streak, best, totalDone}`) and never read again. That carry is why a 60-day
+streak still reads 60 after its first 30 days fall out of the window, and
+`carryIsContiguous` refuses a summary that doesn't abut the window so a gap can't be
+papered over.
 
 There's no verification and no policing. Check-ins carry honest metadata instead —
 `backfilled`, `edited`, `late night` — shown as quiet chips. Trust is the mechanic.
@@ -54,6 +69,13 @@ Both write screenshots to `e2e-shots/`.
 Tauri v2, so the app uses the OS webview instead of bundling a browser: the macOS
 build is a **4 MB DMG**. Electron was built first and dropped — its runtime alone is
 297 MB, which is indefensible for an app this size.
+
+There's a **menubar popover**: a tray icon opens a compact panel with today's due habits
+and one tap each. It's the same bundle in a second window, told apart by
+`index.html?view=widget` — the asset protocol has no SPA fallback, so a real route would
+404 inside the shell. It anchors under the tray icon, flips above it when the tray sits at
+the bottom of the screen (Windows), and hides on blur. Closing the main window leaves the
+tray running.
 
 The one non-obvious constraint: Jazz fetches its WASM crypto core from a `data:` URL,
 so the CSP needs `data:` in **connect-src**, not just `wasm-unsafe-eval` in
@@ -89,3 +111,24 @@ Product intent lives in [PRODUCT.md](PRODUCT.md); the visual system in [DESIGN.m
 Pushing to `main` builds and publishes to GitHub Pages. Set `VITE_JAZZ_API_KEY` to your own
 [Jazz Cloud](https://dashboard.jazz.tools) key, or point `syncPeer` at a self-hosted
 `npx jazz-run sync` — the sync layer is MIT and replaceable.
+
+The public landing page lives at `/`; the installable web app and its client-side routes
+live under `/app`.
+
+### Desktop releases
+
+Push a version tag to build and publish desktop installers:
+
+```bash
+git tag v2.0.0
+git push origin v2.0.0
+```
+
+The `Release desktop apps` workflow publishes DMGs for Apple Silicon and Intel Macs plus
+an NSIS installer for 64-bit Windows. It can also be started manually with a release tag
+from GitHub Actions.
+
+macOS builds use ad-hoc signing by default. For a publicly distributed, notarized build,
+configure `APPLE_CERTIFICATE`, `APPLE_CERTIFICATE_PASSWORD`, `APPLE_ID`,
+`APPLE_PASSWORD`, and `APPLE_TEAM_ID` as repository secrets. Windows installers are
+unsigned until a Windows code-signing setup is added.

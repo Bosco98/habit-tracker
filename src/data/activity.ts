@@ -1,5 +1,5 @@
-import type { DayKey } from "@/lib/days";
-import { logByDay } from "./checkins";
+import { todayKey, type DayKey } from "@/lib/days";
+import { retainedLog } from "./checkins";
 import { circleMembers } from "./members";
 import type { LoadedCircle, LoadedHabit } from "./types";
 
@@ -24,23 +24,34 @@ export interface ReactionSummary {
   mine: Set<string>;
 }
 
+export const LATELY_LIMIT = 10;
+
 export function activityKey(habitId: string, accountId: string, forDay: DayKey): string {
   return `${habitId}|${accountId}|${forDay}`;
+}
+
+export function newestActivitySummaries<T extends Pick<ActivityItem, "loggedAt">>(
+  items: readonly T[],
+  limit = LATELY_LIMIT,
+): T[] {
+  return [...items].sort((a, b) => b.loggedAt - a.loggedAt).slice(0, limit);
 }
 
 /** Newest check-ins across the circle, for the feed. */
 export function circleActivity(
   circle: LoadedCircle,
   myId: string,
-  limit = 30,
+  limit = LATELY_LIMIT,
 ): ActivityItem[] {
   const members = circleMembers(circle, myId);
+  const today = todayKey();
   const items: ActivityItem[] = [];
 
   for (const habit of circle.habits) {
     if (!habit?.$isLoaded) continue;
     for (const member of members) {
-      for (const [forDay, log] of logByDay(habit, member.id)) {
+      // Retained window only — the feed can't surface what the app has dropped.
+      for (const [forDay, log] of retainedLog(habit, member.id, today)) {
         if (log.value <= 0) continue;
         items.push({
           key: activityKey(habit.$jazz.id, member.id, forDay),
@@ -59,7 +70,7 @@ export function circleActivity(
     }
   }
 
-  return items.sort((a, b) => b.loggedAt - a.loggedAt).slice(0, limit);
+  return newestActivitySummaries(items, limit);
 }
 
 export function summarizeReactions(circle: LoadedCircle, myId: string): ReactionSummary {

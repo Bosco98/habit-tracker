@@ -12,11 +12,12 @@ import {
 import { Segmented } from "@/components/segmented";
 import type { HabitInput } from "@/data/mutations";
 import type { LoadedCircle, LoadedHabit } from "@/data/types";
+import { normalizeCadence } from "@/lib/cadence";
 import type { HabitKind } from "@/lib/completion";
 import { cn } from "@/lib/utils";
-import { WeekdayPicker } from "./weekday-picker";
-
-type ScheduleType = "daily" | "weekdays" | "timesPerWeek";
+import { CadencePicker } from "./cadence-picker";
+import { HABIT_EMOJI } from "@/lib/habit-emoji";
+import { EmojiPicker } from "@/components/emoji-picker";
 
 interface HabitFormProps {
   open: boolean;
@@ -28,7 +29,7 @@ interface HabitFormProps {
   onSubmit: (input: HabitInput, circleId: string | null) => void;
 }
 
-const inputStyle = "neu-well rounded-xl border-0 bg-well shadow-none dark:bg-well";
+const inputStyle = "stock-flat rounded-lg bg-card shadow-none";
 
 export function HabitForm({
   open,
@@ -39,40 +40,35 @@ export function HabitForm({
   onSubmit,
 }: HabitFormProps) {
   const [name, setName] = useState(habit?.name ?? "");
-  const [emoji, setEmoji] = useState(habit?.emoji ?? "🌱");
+  const [emoji, setEmoji] = useState(habit?.emoji ?? HABIT_EMOJI[0]);
   const [kind, setKind] = useState<HabitKind>(habit?.kind ?? "binary");
   const [target, setTarget] = useState(() =>
     habit?.kind === "timer"
       ? String(Math.round((habit.target ?? 600) / 60))
       : String(habit?.target ?? 3),
   );
-  const [scheduleType, setScheduleType] = useState<ScheduleType>(habit?.schedule.type ?? "daily");
-  const [days, setDays] = useState<number[]>(habit?.schedule.days ?? [1, 2, 3, 4, 5]);
-  const [perWeek, setPerWeek] = useState(String(habit?.schedule.perWeek ?? 3));
+  const [everyDays, setEveryDays] = useState(
+    () => normalizeCadence(habit?.everyDays).everyDays,
+  );
   const [circleId, setCircleId] = useState<string | null>(defaultCircleId);
 
   const showTargets = !habit && circles.length > 0;
-
-  const valid =
-    name.trim().length > 0 &&
-    (scheduleType !== "weekdays" || days.length > 0) &&
-    (kind === "binary" || Number(target) >= 1);
+  const valid = name.trim().length > 0 && (kind === "binary" || Number(target) >= 1);
 
   const submit = () => {
     if (!valid) return;
     onSubmit(
       {
         name: name.trim(),
-        emoji: emoji.trim() || "🌱",
+        emoji,
         kind,
         target:
-          kind === "binary" ? undefined : kind === "timer" ? Number(target) * 60 : Number(target),
-        schedule:
-          scheduleType === "daily"
-            ? { type: "daily" }
-            : scheduleType === "weekdays"
-              ? { type: "weekdays", days }
-              : { type: "timesPerWeek", perWeek: Math.min(7, Math.max(1, Number(perWeek))) },
+          kind === "binary"
+            ? undefined
+            : kind === "timer"
+              ? Number(target) * 60
+              : Number(target),
+        cadence: normalizeCadence(everyDays),
       },
       showTargets ? circleId : defaultCircleId,
     );
@@ -81,7 +77,10 @@ export function HabitForm({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="bottom" className="mx-auto max-w-lg rounded-t-3xl border-0 bg-background">
+      <SheetContent
+        side="bottom"
+        className="mx-auto max-w-lg rounded-t-2xl border-x-0 border-b-0 bg-background"
+      >
         <SheetHeader>
           <SheetTitle>{habit ? "Edit habit" : "New habit"}</SheetTitle>
           <SheetDescription className="sr-only">
@@ -95,29 +94,21 @@ export function HabitForm({
             submit();
           }}
         >
-          <div className="flex gap-2">
-            <div className="w-16">
-              <Label htmlFor="habit-emoji" className="sr-only">Emoji</Label>
-              <Input
-                id="habit-emoji"
-                value={emoji}
-                onChange={(e) => setEmoji(e.target.value)}
-                className={cn(inputStyle, "text-center text-xl")}
-                aria-label="Emoji"
-              />
-            </div>
-            <div className="flex-1">
-              <Label htmlFor="habit-name" className="sr-only">Name</Label>
-              <Input
-                id="habit-name"
-                placeholder="Habit name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className={inputStyle}
-                autoFocus={!habit}
-              />
-            </div>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="habit-name" className="sr-only">
+              Name
+            </Label>
+            <Input
+              id="habit-name"
+              placeholder="Habit name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className={inputStyle}
+              autoFocus={!habit}
+            />
           </div>
+
+          <EmojiPicker value={emoji} onChange={setEmoji} />
 
           {showTargets && (
             <div className="flex flex-col gap-2">
@@ -156,50 +147,26 @@ export function HabitForm({
                   min={1}
                   value={target}
                   onChange={(e) => setTarget(e.target.value)}
-                  className={cn(inputStyle, "w-24 text-center tabular-nums")}
+                  className={cn(inputStyle, "tnum w-24 text-center")}
                   aria-label={kind === "timer" ? "Minutes per day" : "Times per day"}
                 />
                 <span className="text-muted-foreground text-sm">
-                  {kind === "timer" ? "minutes a day" : "times a day"}
+                  {kind === "timer" ? "minutes each time" : "times each time"}
                 </span>
               </div>
             )}
           </div>
 
           <div className="flex flex-col gap-2">
-            <Label>Schedule</Label>
-            <Segmented<ScheduleType>
-              label="Schedule"
-              value={scheduleType}
-              onChange={setScheduleType}
-              options={[
-                { value: "daily", label: "Daily" },
-                { value: "weekdays", label: "Days" },
-                { value: "timesPerWeek", label: "Weekly" },
-              ]}
+            <Label>How often</Label>
+            <CadencePicker
+              everyDays={everyDays}
+              onChange={setEveryDays}
+              inputClassName={inputStyle}
             />
-            {scheduleType === "weekdays" && <WeekdayPicker days={days} onChange={setDays} />}
-            {scheduleType === "timesPerWeek" && (
-              <div className="flex items-center gap-2">
-                <Input
-                  type="number"
-                  min={1}
-                  max={7}
-                  value={perWeek}
-                  onChange={(e) => setPerWeek(e.target.value)}
-                  className={cn(inputStyle, "w-24 text-center tabular-nums")}
-                  aria-label="Times per week"
-                />
-                <span className="text-muted-foreground text-sm">times a week</span>
-              </div>
-            )}
           </div>
 
-          <Button
-            type="submit"
-            disabled={!valid}
-            className="neu-raised mt-1 h-12 rounded-full text-base"
-          >
+          <Button type="submit" disabled={!valid} className="stock mt-1 h-12 rounded-lg text-base">
             {habit ? "Save changes" : "Create habit"}
           </Button>
         </form>

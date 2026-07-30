@@ -11,11 +11,13 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { PassphraseDisplay } from "@/components/auth/passphrase-display";
-import { Segmented } from "@/components/segmented";
+import { ReminderSetting } from "@/components/reminder-setting";
+import { OpenAtLoginSetting } from "@/components/open-at-login-setting";
 import { SyncBadge } from "@/components/sync-badge";
 import { useAuth } from "@/data/auth";
 import { useAppAccount } from "@/data/hooks";
-import { setDisplayName, setWeekStart } from "@/data/mutations";
+import { setDisplayName } from "@/data/mutations";
+import { RETENTION_DAYS } from "@/lib/retention";
 
 interface SettingsSheetProps {
   open: boolean;
@@ -24,7 +26,7 @@ interface SettingsSheetProps {
   onLogIn: () => void;
 }
 
-const inputStyle = "neu-well rounded-xl border-0 bg-well shadow-none dark:bg-well";
+const inputStyle = "stock-flat rounded-lg bg-card shadow-none";
 
 export function SettingsSheet({ open, onOpenChange, onSignUp, onLogIn }: SettingsSheetProps) {
   const account = useAppAccount();
@@ -34,11 +36,13 @@ export function SettingsSheet({ open, onOpenChange, onSignUp, onLogIn }: Setting
   if (!account.$isLoaded) return null;
 
   const name = account.profile.name ?? "";
-  const weekStartsOn = account.root.settings.weekStartsOn;
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="bottom" className="mx-auto max-w-lg rounded-t-3xl border-0 bg-background">
+      <SheetContent
+        side="bottom"
+        className="mx-auto max-w-lg rounded-t-2xl border-x-0 border-b-0 bg-background"
+      >
         <SheetHeader>
           <SheetTitle>Settings</SheetTitle>
           <SheetDescription className="sr-only">
@@ -59,17 +63,16 @@ export function SettingsSheet({ open, onOpenChange, onSignUp, onLogIn }: Setting
             <SyncBadge />
           </section>
 
-          <section className="flex flex-col gap-2">
-            <Label>Week starts on</Label>
-            <Segmented<string>
-              label="Week starts on"
-              value={String(weekStartsOn)}
-              onChange={(value) => setWeekStart(account, Number(value))}
-              options={[
-                { value: "1", label: "Monday" },
-                { value: "0", label: "Sunday" },
-              ]}
-            />
+          <ReminderSetting />
+          <OpenAtLoginSetting />
+
+          <section className="stock-flat flex flex-col gap-1 rounded-lg p-3">
+            <p className="text-sm font-semibold">History</p>
+            <p className="text-muted-foreground text-sm">
+              The last {RETENTION_DAYS} days are kept. Older days are folded into your
+              streak totals and then dropped — your run keeps counting, the raw log
+              doesn't pile up.
+            </p>
           </section>
 
           <section className="flex flex-col gap-3">
@@ -87,7 +90,7 @@ export function SettingsSheet({ open, onOpenChange, onSignUp, onLogIn }: Setting
                 <Button
                   variant="ghost"
                   onClick={() => setRevealed((prev) => !prev)}
-                  className="neu-raised h-11 justify-start rounded-full active:neu-pressed"
+                  className="stock stock-press active:stock-press-active h-11 justify-start rounded-lg"
                 >
                   {revealed ? <EyeOff /> : <Eye />}
                   {revealed ? "Hide recovery phrase" : "Show recovery phrase"}
@@ -99,7 +102,7 @@ export function SettingsSheet({ open, onOpenChange, onSignUp, onLogIn }: Setting
                     logOut();
                     onOpenChange(false);
                   }}
-                  className="text-destructive neu-raised h-11 justify-start rounded-full active:neu-pressed"
+                  className="text-destructive stock stock-press active:stock-press-active h-11 justify-start rounded-lg"
                 >
                   <LogOut /> Log out
                 </Button>
@@ -111,7 +114,7 @@ export function SettingsSheet({ open, onOpenChange, onSignUp, onLogIn }: Setting
                     onOpenChange(false);
                     onSignUp();
                   }}
-                  className="neu-raised h-11 flex-1 rounded-full"
+                  className="stock h-11 flex-1 rounded-lg"
                 >
                   Create account
                 </Button>
@@ -121,7 +124,7 @@ export function SettingsSheet({ open, onOpenChange, onSignUp, onLogIn }: Setting
                     onOpenChange(false);
                     onLogIn();
                   }}
-                  className="neu-raised h-11 flex-1 rounded-full active:neu-pressed"
+                  className="stock stock-press active:stock-press-active h-11 flex-1 rounded-lg"
                 >
                   Log in
                 </Button>

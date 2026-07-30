@@ -10,9 +10,9 @@ export function MemberList({ members }: MemberListProps) {
       {members.map((member) => (
         <li
           key={member.id}
-          className="neu-raised flex items-center gap-2 rounded-full bg-card py-1.5 pr-3 pl-1.5 text-sm"
+          className="stock flex items-center gap-2 rounded-full py-1.5 pr-3 pl-1.5 text-sm"
         >
-          <span className="neu-well flex size-7 items-center justify-center rounded-full text-[11px] font-semibold">
+          <span className="stock-flat flex size-7 items-center justify-center rounded-full text-[11px] font-bold">
             {member.name.slice(0, 2).toUpperCase()}
           </span>
           {member.isMe ? "You" : member.name}

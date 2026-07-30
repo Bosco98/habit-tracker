@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { EmojiPicker } from "@/components/emoji-picker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,12 +11,11 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import type { LoadedCircle } from "@/data/types";
-import { cn } from "@/lib/utils";
+import { CIRCLE_EMOJI } from "@/lib/habit-emoji";
 
 export interface CircleInput {
   name: string;
   emoji: string;
-  stake?: string;
 }
 
 interface CircleFormProps {
@@ -25,12 +25,9 @@ interface CircleFormProps {
   onSubmit: (input: CircleInput) => void;
 }
 
-const inputStyle = "neu-well rounded-xl border-0 bg-well shadow-none dark:bg-well";
-
 export function CircleForm({ open, onOpenChange, circle, onSubmit }: CircleFormProps) {
   const [name, setName] = useState(circle?.name ?? "");
-  const [emoji, setEmoji] = useState(circle?.emoji ?? "🤝");
-  const [stake, setStake] = useState(circle?.stake ?? "");
+  const [emoji, setEmoji] = useState(circle?.emoji ?? CIRCLE_EMOJI[0]);
 
   const valid = name.trim().length > 0;
 
@@ -40,7 +37,7 @@ export function CircleForm({ open, onOpenChange, circle, onSubmit }: CircleFormP
         <SheetHeader>
           <SheetTitle>{circle ? "Edit circle" : "New circle"}</SheetTitle>
           <SheetDescription>
-            A circle is a private space you share with one person or a few.
+            A shared shelf. Habits you put here, everyone here can keep.
           </SheetDescription>
         </SheetHeader>
         <form
@@ -48,52 +45,25 @@ export function CircleForm({ open, onOpenChange, circle, onSubmit }: CircleFormP
           onSubmit={(e) => {
             e.preventDefault();
             if (!valid) return;
-            onSubmit({
-              name: name.trim(),
-              emoji: emoji.trim() || "🤝",
-              stake: stake.trim() || undefined,
-            });
+            onSubmit({ name: name.trim(), emoji });
             onOpenChange(false);
           }}
         >
-          <div className="flex gap-2">
-            <div className="w-16">
-              <Label htmlFor="circle-emoji" className="sr-only">Emoji</Label>
-              <Input
-                id="circle-emoji"
-                value={emoji}
-                onChange={(e) => setEmoji(e.target.value)}
-                className={cn(inputStyle, "text-center text-xl")}
-              />
-            </div>
-            <div className="flex-1">
-              <Label htmlFor="circle-name" className="sr-only">Name</Label>
-              <Input
-                id="circle-name"
-                placeholder="Circle name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className={inputStyle}
-                autoFocus={!circle}
-              />
-            </div>
-          </div>
-
           <div className="flex flex-col gap-2">
-            <Label htmlFor="circle-stake">Weekly stake (optional)</Label>
+            <Label htmlFor="circle-name">Name</Label>
             <Input
-              id="circle-stake"
-              placeholder="Loser buys coffee"
-              value={stake}
-              onChange={(e) => setStake(e.target.value)}
-              className={inputStyle}
+              id="circle-name"
+              placeholder="Weeknights"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="stock-flat bg-card rounded-lg shadow-none"
+              autoFocus={!circle}
             />
-            <p className="text-muted-foreground text-xs">
-              What the loser of a week owes. The app only remembers it — you settle it.
-            </p>
           </div>
 
-          <Button type="submit" disabled={!valid} className="neu-raised h-12 rounded-full text-base">
+          <EmojiPicker value={emoji} onChange={setEmoji} options={CIRCLE_EMOJI} />
+
+          <Button type="submit" disabled={!valid} className="stock h-12 rounded-lg text-base">
             {circle ? "Save changes" : "Create circle"}
           </Button>
         </form>

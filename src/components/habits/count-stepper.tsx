@@ -6,42 +6,58 @@ interface CountStepperProps {
   target: number;
   onChange: (next: number) => void;
   label: string;
+  disabled?: boolean;
 }
 
-export function CountStepper({ value, target, onChange, label }: CountStepperProps) {
+const stepButton =
+  "stock stock-press active:stock-press-active flex size-8 items-center justify-center rounded-md disabled:cursor-not-allowed disabled:saturate-0";
+
+export function CountStepper({
+  value,
+  target,
+  onChange,
+  label,
+  disabled = false,
+}: CountStepperProps) {
   const done = value >= target;
   return (
     <div
       className={cn(
-        "flex shrink-0 items-center gap-1 rounded-full p-1 transition-shadow duration-200",
-        done ? "neu-pressed" : "neu-well",
+        "stock-flat flex shrink-0 items-center gap-1.5 rounded-lg p-1.5",
+        done && "bg-primary",
+        disabled && "opacity-50 saturate-0",
       )}
       aria-label={label}
+      aria-disabled={disabled}
+      title={disabled ? "Rest day — this habit is not due today" : undefined}
     >
       <button
         type="button"
         onClick={() => onChange(Math.max(0, value - 1))}
-        disabled={value === 0}
+        disabled={disabled || value === 0}
         aria-label="Decrease"
-        className="neu-raised flex size-9 items-center justify-center rounded-full bg-background text-muted-foreground transition-shadow active:neu-pressed disabled:opacity-40 disabled:shadow-none"
+        className={stepButton}
       >
         <Minus className="size-4" />
       </button>
       <span
         className={cn(
-          "min-w-11 text-center text-sm tabular-nums",
-          done ? "text-primary-strong font-semibold" : "text-foreground",
+          "tnum min-w-11 text-center text-sm font-semibold",
+          done ? "text-primary-foreground" : "text-foreground",
         )}
         aria-live="polite"
       >
         {value}
-        <span className="text-muted-foreground font-normal">/{target}</span>
+        <span className={cn("font-normal", done ? "opacity-70" : "text-muted-foreground")}>
+          /{target}
+        </span>
       </span>
       <button
         type="button"
         onClick={() => onChange(value + 1)}
+        disabled={disabled}
         aria-label="Increase"
-        className="neu-raised flex size-9 items-center justify-center rounded-full bg-background transition-shadow active:neu-pressed"
+        className={stepButton}
       >
         <Plus className="size-4" />
       </button>

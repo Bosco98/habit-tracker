@@ -1,16 +1,26 @@
 import type { co } from "jazz-tools";
-import type { AppAccount, CheckIn, Circle, Forfeit, Habit } from "./schema";
+import type {
+  AchievementEvent,
+  AppAccount,
+  Carry,
+  CheckIn,
+  Circle,
+  Habit,
+} from "./schema";
 
-/** Depth query for a habit with everything the UI needs. */
+/**
+ * Depth query for a habit with everything the UI needs. `carry` is optional
+ * on the schema (habits written before retention existed don't have one), so
+ * it resolves shallowly and readers guard on `$isLoaded`.
+ */
 export const habitResolve = {
-  schedule: true,
   checkIns: { $each: true },
+  carry: { $each: true },
 } as const;
 
 export const circleResolve = {
   habits: { $each: habitResolve },
   reactions: { $each: true },
-  forfeits: { $each: true },
 } as const;
 
 /** Depth query for the whole account tree. */
@@ -19,7 +29,7 @@ export const accountResolve = {
   root: {
     habits: { $each: habitResolve },
     circles: { $each: circleResolve },
-    settings: true,
+    achievements: { $each: true },
   },
 } as const;
 
@@ -30,15 +40,16 @@ export const accountResolve = {
  */
 export const writableResolve = {
   profile: true,
-  root: { habits: true, circles: true, settings: true },
+  root: { habits: true, circles: true, achievements: true },
 } as const;
 
 export type WritableAccount = co.loaded<typeof AppAccount, typeof writableResolve>;
 
 export type LoadedHabit = co.loaded<typeof Habit, typeof habitResolve>;
 export type LoadedCheckIn = co.loaded<typeof CheckIn>;
+export type LoadedCarry = co.loaded<typeof Carry>;
 export type LoadedCircle = co.loaded<typeof Circle, typeof circleResolve>;
-export type LoadedForfeit = co.loaded<typeof Forfeit>;
+export type LoadedAchievementEvent = co.loaded<typeof AchievementEvent>;
 export type LoadedAccount = co.loaded<typeof AppAccount, typeof accountResolve>;
 
 /** A habit plus where it lives — the single shape the UI renders. */

@@ -1,15 +1,13 @@
 import { useState } from "react";
 import { Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { LogInSheet } from "@/components/auth/log-in-sheet";
-import { SignUpSheet } from "@/components/auth/sign-up-sheet";
 import { SettingsSheet } from "@/components/settings-sheet";
+import { useAuthSheets } from "@/lib/auth-sheets-context";
 
-/** Owns the account surfaces so the shell stays a layout concern only. */
+/** Owns the settings surface; the auth sheets live above, in AuthSheetsProvider. */
 export function AccountMenu() {
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [signUpOpen, setSignUpOpen] = useState(false);
-  const [logInOpen, setLogInOpen] = useState(false);
+  const { openSignUp, openLogIn } = useAuthSheets();
 
   return (
     <>
@@ -24,11 +22,9 @@ export function AccountMenu() {
       <SettingsSheet
         open={settingsOpen}
         onOpenChange={setSettingsOpen}
-        onSignUp={() => setSignUpOpen(true)}
-        onLogIn={() => setLogInOpen(true)}
+        onSignUp={openSignUp}
+        onLogIn={openLogIn}
       />
-      <SignUpSheet open={signUpOpen} onOpenChange={setSignUpOpen} />
-      <LogInSheet open={logInOpen} onOpenChange={setLogInOpen} />
     </>
   );
 }

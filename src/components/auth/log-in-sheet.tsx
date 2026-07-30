@@ -69,7 +69,7 @@ export function LogInSheet({ open, onOpenChange }: LogInSheetProps) {
               autoCorrect="off"
               spellCheck={false}
               placeholder="your words, separated by spaces"
-              className="neu-well placeholder:text-muted-foreground focus-visible:ring-ring w-full resize-none rounded-xl bg-well p-3 text-sm outline-none focus-visible:ring-2"
+              className="stock-flat placeholder:text-muted-foreground focus-visible:ring-ring w-full resize-none rounded-lg p-3 text-sm outline-none focus-visible:ring-2"
             />
           </div>
           {error && (
@@ -81,7 +81,7 @@ export function LogInSheet({ open, onOpenChange }: LogInSheetProps) {
           <Button
             type="submit"
             disabled={busy || value.trim().length === 0}
-            className="neu-raised h-12 rounded-full text-base"
+            className="stock h-12 rounded-lg text-base"
           >
             {busy ? "Unlocking…" : "Log in"}
           </Button>

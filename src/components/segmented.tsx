@@ -20,7 +20,7 @@ export function Segmented<T extends string>({
   label,
 }: SegmentedProps<T>) {
   return (
-    <div role="radiogroup" aria-label={label} className="neu-well flex gap-1 rounded-full bg-well p-1">
+    <div role="radiogroup" aria-label={label} className="stock-flat flex gap-1 rounded-lg p-1">
       {options.map((option) => (
         <button
           key={option.value}
@@ -31,7 +31,7 @@ export function Segmented<T extends string>({
           className={cn(
             "flex-1 rounded-full px-3 py-2 text-sm transition-shadow duration-200",
             value === option.value
-              ? "neu-raised bg-background font-medium"
+              ? "bg-primary text-primary-foreground font-semibold"
               : "text-muted-foreground",
           )}
         >

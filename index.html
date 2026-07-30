@@ -2,18 +2,81 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" sizes="any" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="description" content="A local-first, end-to-end encrypted habit tracker you can share with your people." />
+    <meta name="description" content="Habits is a private, local-first habit tracker for personal routines and small accountability circles. Track on web, macOS, and Windows." />
+    <meta name="keywords" content="habit tracker, private habit tracker, shared habits, accountability app, habit tracking app, daily habits, local-first app" />
+    <meta name="author" content="Bosco Correa" />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <meta name="google-site-verification" content="googlebc3b3821644185f1" />
+    <meta name="google-adsense-account" content="ca-pub-2981343356966723" />
+    <link rel="canonical" href="https://habit-tracker.fun/" />
+    <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:site_name" content="Habits — Private Habit Tracker" />
+    <meta property="og:title" content="Habits — Keep the promise. Together." />
+    <meta property="og:description" content="A private, local-first habit tracker for you and the small circle that helps you keep going." />
+    <meta property="og:url" content="https://habit-tracker.fun/" />
+    <meta property="og:image" content="https://habit-tracker.fun/og-image.png" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Habits — Keep the promise. Together." />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Habits — Keep the promise. Together." />
+    <meta name="twitter:description" content="Private habit tracking for personal routines and small accountability circles." />
+    <meta name="twitter:image" content="https://habit-tracker.fun/og-image.png" />
+    <meta name="twitter:image:alt" content="Habits — Keep the promise. Together." />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-title" content="Habits" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="application-name" content="Habits" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="msapplication-TileColor" content="#41a7f4" />
+    <meta name="msapplication-TileImage" content="/mstile-150x150.png" />
+    <meta name="msapplication-config" content="/browserconfig.xml" />
     <meta name="theme-color" content="#f0eee9" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#232120" media="(prefers-color-scheme: dark)" />
-    <title>Habits</title>
-    <script src="./theme-init.js"></script>
+    <title>Habits — Private Habit Tracker for You and Your Circle</title>
+    <script src="/theme-init.js"></script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Habits",
+        "alternateName": "Habit Tracker",
+        "url": "https://habit-tracker.fun/",
+        "downloadUrl": "https://github.com/Bosco98/habit-tracker/releases/latest",
+        "image": "https://habit-tracker.fun/og-image.png",
+        "softwareVersion": "2.0.0",
+        "applicationCategory": "ProductivityApplication",
+        "operatingSystem": "Web, macOS, Windows",
+        "description": "A private, local-first habit tracker for personal routines and small accountability circles.",
+        "featureList": [
+          "Personal check, count, and timer habits",
+          "Private accountability circles",
+          "Local-first encrypted sync",
+          "Thirty-day habit insights",
+          "Desktop tray check-ins and notifications"
+        ],
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        },
+        "author": {
+          "@type": "Person",
+          "name": "Bosco Correa",
+          "url": "https://github.com/Bosco98"
+        }
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>

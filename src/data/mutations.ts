@@ -1,6 +1,7 @@
-import type { DayKey } from "@/lib/days";
+import { normalizeCadence, type Cadence } from "@/lib/cadence";
 import type { HabitKind } from "@/lib/completion";
-import type { ScheduleSpec } from "@/lib/streaks";
+import type { DayKey } from "@/lib/days";
+import { syncDesktopPeers } from "@/lib/platform";
 import type { LoadedHabit, WritableAccount } from "./types";
 
 export interface HabitInput {
@@ -8,27 +9,25 @@ export interface HabitInput {
   emoji: string;
   kind: HabitKind;
   target?: number;
-  schedule: ScheduleSpec;
-}
-
-export function toScheduleInit(schedule: ScheduleSpec) {
-  return {
-    type: schedule.type,
-    days: schedule.type === "weekdays" ? [...schedule.days] : undefined,
-    perWeek: schedule.type === "timesPerWeek" ? schedule.perWeek : undefined,
-  };
+  cadence: Cadence;
 }
 
 export function createHabit(account: WritableAccount, input: HabitInput): void {
-  account.root.habits.$jazz.push({
+  account.root.habits.$jazz.push(habitInit(input));
+}
+
+/** The shape a new Habit CoMap starts from — shared by personal and circle habits. */
+export function habitInit(input: HabitInput) {
+  return {
     name: input.name,
     emoji: input.emoji,
     kind: input.kind,
     target: input.target,
-    schedule: toScheduleInit(input.schedule),
+    everyDays: normalizeCadence(input.cadence.everyDays).everyDays,
     checkIns: [],
+    carry: [],
     createdAt: Date.now(),
-  });
+  };
 }
 
 export function updateHabit(habit: LoadedHabit, input: HabitInput): void {
@@ -36,7 +35,7 @@ export function updateHabit(habit: LoadedHabit, input: HabitInput): void {
   habit.$jazz.set("emoji", input.emoji);
   habit.$jazz.set("kind", input.kind);
   habit.$jazz.set("target", input.target);
-  habit.$jazz.set("schedule", toScheduleInit(input.schedule));
+  habit.$jazz.set("everyDays", normalizeCadence(input.cadence.everyDays).everyDays);
 }
 
 /**
@@ -56,6 +55,7 @@ export function logCheckIn(
     value,
     editedAt: options?.edited ? Date.now() : undefined,
   });
+  syncDesktopPeers();
 }
 
 export function archiveHabit(habit: LoadedHabit): void {
@@ -63,14 +63,8 @@ export function archiveHabit(habit: LoadedHabit): void {
 }
 
 export function deleteHabit(account: WritableAccount, habit: LoadedHabit): void {
-  const index = account.root.habits.findIndex(
-    (h) => h?.$jazz.id === habit.$jazz.id,
-  );
+  const index = account.root.habits.findIndex((h) => h?.$jazz.id === habit.$jazz.id);
   if (index >= 0) account.root.habits.$jazz.splice(index, 1);
-}
-
-export function setWeekStart(account: WritableAccount, weekStartsOn: number): void {
-  account.root.settings.$jazz.set("weekStartsOn", weekStartsOn);
 }
 
 export function setDisplayName(account: WritableAccount, name: string): void {

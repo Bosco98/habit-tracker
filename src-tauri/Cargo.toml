@@ -1,6 +1,6 @@
 [package]
 name = "habits"
-version = "0.1.0"
+version = "2.0.0"
 description = "A local-first, end-to-end encrypted habit tracker"
 authors = ["bosco"]
 edition = "2021"
@@ -14,8 +14,13 @@ crate-type = ["staticlib", "cdylib", "rlib"]
 tauri-build = { version = "2", features = [] }
 
 [dependencies]
-tauri = { version = "2", features = [] }
+tauri = { version = "2", features = ["tray-icon", "image-png", "macos-private-api"] }
 tauri-plugin-opener = "2"
+tauri-plugin-notification = "2"
+tauri-plugin-autostart = "2"
+# Local time. The reminder is an alarm on a wall clock, so it has to know the
+# user's offset and follow it across a DST change.
+chrono = { version = "0.4", default-features = false, features = ["clock", "std"] }
 
 [profile.release]
 codegen-units = 1

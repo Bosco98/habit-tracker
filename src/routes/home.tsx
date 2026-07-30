@@ -1,12 +1,12 @@
-import { useState } from "react";
-import { Plus } from "lucide-react";
+import { useMemo, useState } from "react";
 import { EmptyState } from "@/components/empty-state";
-import { DayStrip } from "@/components/habits/day-strip";
 import { HabitDetailSheet } from "@/components/habits/habit-detail-sheet";
 import { HabitForm } from "@/components/habits/habit-form";
 import { HabitList } from "@/components/habits/habit-list";
+import { TopBar } from "@/components/top-bar";
 import { createSharedHabit, removeSharedHabit } from "@/data/circles";
-import { useAppAccount, useHabitEntries } from "@/data/hooks";
+import { doneDaySet, retainedLog } from "@/data/checkins";
+import { useAppAccount, useHabitEntries, useRetention } from "@/data/hooks";
 import {
   archiveHabit,
   createHabit,
@@ -15,26 +15,49 @@ import {
   type HabitInput,
 } from "@/data/mutations";
 import type { HabitEntry } from "@/data/types";
-import { formatDay, lastNDays, todayKey } from "@/lib/days";
+import { isDueDay } from "@/lib/cadence";
+import { habitCadence, habitCreatedDay } from "@/data/stats";
+import { todayKey } from "@/lib/days";
 
 export function Home() {
   const account = useAppAccount();
   const { personal, shared, circles } = useHabitEntries(account);
+  useRetention(account);
   const today = todayKey();
-  const [selectedDay, setSelectedDay] = useState(today);
   const [formOpen, setFormOpen] = useState(false);
+  const [formSeq, setFormSeq] = useState(0);
   const [editing, setEditing] = useState<HabitEntry | null>(null);
   const [detail, setDetail] = useState<HabitEntry | null>(null);
 
+  const myId = account.$isLoaded ? account.$jazz.id : "";
+
+  /** Only habits actually due today count toward the day's score. */
+  const progress = useMemo(() => {
+    const due = [...personal, ...shared].filter((entry) =>
+      isDueDay(today, habitCreatedDay(entry.habit), habitCadence(entry.habit)),
+    );
+    const done = due.filter((entry) =>
+      doneDaySet(retainedLog(entry.habit, myId, today), entry.habit).has(today),
+    ).length;
+    return { done, total: due.length };
+  }, [personal, shared, myId, today]);
+
   if (!account.$isLoaded) return null; // first local read is imperceptible
 
-  const myId = account.$jazz.id;
   const myName = account.profile.name ?? "You";
-  const weekStartsOn = account.root.settings.weekStartsOn;
   const isEmpty = personal.length === 0 && shared.length === 0;
 
+  // Bumped on every open so the form remounts — otherwise the previous
+  // habit's type and cadence leak into the next one you create.
   const openCreate = () => {
     setEditing(null);
+    setFormSeq((n) => n + 1);
+    setFormOpen(true);
+  };
+
+  const openEdit = (entry: HabitEntry) => {
+    setEditing(entry);
+    setFormSeq((n) => n + 1);
     setFormOpen(true);
   };
 
@@ -51,13 +74,8 @@ export function Home() {
   const listProps = {
     myId,
     myName,
-    day: selectedDay,
-    weekStartsOn,
     onOpen: setDetail,
-    onEdit: (entry: HabitEntry) => {
-      setEditing(entry);
-      setFormOpen(true);
-    },
+    onEdit: openEdit,
     onArchive: (entry: HabitEntry) => archiveHabit(entry.habit),
     onDelete: (entry: HabitEntry) =>
       entry.circle
@@ -66,60 +84,49 @@ export function Home() {
   };
 
   return (
-    <div className="flex flex-col gap-5">
-      <p className="text-muted-foreground text-sm">
-        {selectedDay === today
-          ? "Today"
-          : formatDay(selectedDay, { weekday: "long", month: "long", day: "numeric" })}
-      </p>
-      <DayStrip
-        days={lastNDays(7, today)}
-        selected={selectedDay}
-        today={today}
-        onSelect={setSelectedDay}
-      />
+    <>
+      <TopBar progress={isEmpty ? null : progress} onCreate={openCreate} />
 
-      {isEmpty ? (
-        <EmptyState
-          emoji="🌱"
-          title="No habits yet"
-          hint="Plant the first one — small, daily, yours."
-          actionLabel="Create a habit"
-          onAction={openCreate}
-        />
-      ) : (
-        <div className="flex flex-col gap-6">
-          <HabitList
-            label={shared.length > 0 ? "Yours" : undefined}
-            entries={personal}
-            {...listProps}
+      <div className="flex flex-col gap-6 px-4 pt-4">
+        {isEmpty ? (
+          <EmptyState
+            emoji="🌱"
+            title="No habits yet"
+            hint="Start with one. Small, and yours."
+            actionLabel="Create a habit"
+            onAction={openCreate}
           />
-          <HabitList label="Shared" entries={shared} {...listProps} />
-          <button
-            type="button"
-            onClick={openCreate}
-            className="neu-raised text-muted-foreground mx-auto flex items-center gap-2 rounded-full px-5 py-2.5 text-sm transition-shadow active:neu-pressed"
-          >
-            <Plus className="size-4" /> New habit
-          </button>
-        </div>
-      )}
+        ) : (
+          <>
+            <HabitList
+              label={shared.length > 0 ? "Yours" : undefined}
+              entries={personal}
+              {...listProps}
+            />
+            <HabitList
+              label="Shared"
+              entries={shared}
+              indexOffset={personal.length}
+              {...listProps}
+            />
+          </>
+        )}
 
-      <HabitForm
-        key={editing?.habit.$jazz.id ?? "new"}
-        open={formOpen}
-        onOpenChange={setFormOpen}
-        habit={editing?.habit ?? null}
-        circles={circles}
-        onSubmit={submit}
-      />
-      <HabitDetailSheet
-        entry={detail}
-        myId={myId}
-        myName={myName}
-        weekStartsOn={weekStartsOn}
-        onOpenChange={(open) => !open && setDetail(null)}
-      />
-    </div>
+        <HabitForm
+          key={`${editing?.habit.$jazz.id ?? "new"}-${formSeq}`}
+          open={formOpen}
+          onOpenChange={setFormOpen}
+          habit={editing?.habit ?? null}
+          circles={circles}
+          onSubmit={submit}
+        />
+        <HabitDetailSheet
+          entry={detail}
+          myId={myId}
+          myName={myName}
+          onOpenChange={(open) => !open && setDetail(null)}
+        />
+      </div>
+    </>
   );
 }

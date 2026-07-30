@@ -53,7 +53,7 @@ page.on("pageerror", (e) => errors.push(String(e).slice(0, 200)));
 const wasm = [];
 page.on("response", (r) => r.url().endsWith(".wasm") && wasm.push(r.status()));
 
-await page.goto(`http://localhost:${PORT}/`, { waitUntil: "networkidle" });
+await page.goto(`http://localhost:${PORT}/app`, { waitUntil: "networkidle" });
 await page.waitForTimeout(3000);
 
 // Creating and persisting a habit exercises the WASM crypto end to end.
@@ -72,7 +72,7 @@ const persisted = (await page.getByText("WebKit smoke").count()) > 0;
 // A client route must resolve through the SPA fallback.
 await page.getByRole("link", { name: "Insights" }).click();
 await page.waitForTimeout(1500);
-const routed = page.url().endsWith("/insights");
+const routed = page.url().endsWith("/app/insights");
 
 console.log("\nRESULT (WebKit + Tauri CSP):");
 console.log("  wasm fetched:", wasm.length ? wasm.join(",") : "NONE");

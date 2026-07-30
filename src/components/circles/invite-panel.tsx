@@ -42,7 +42,7 @@ export function InvitePanel({ circle }: InvitePanelProps) {
       <Button
         variant="ghost"
         onClick={create}
-        className="neu-raised h-11 w-full rounded-full active:neu-pressed"
+        className="stock stock-press active:stock-press-active h-11 w-full rounded-lg"
       >
         <QrCode /> Invite someone
       </Button>
@@ -50,7 +50,7 @@ export function InvitePanel({ circle }: InvitePanelProps) {
   }
 
   return (
-    <div className="neu-well flex flex-col items-center gap-3 rounded-2xl bg-well p-4">
+    <div className="stock-flat flex flex-col items-center gap-3 rounded-xl p-4">
       {qr && (
         <img
           src={qr}
@@ -65,7 +65,7 @@ export function InvitePanel({ circle }: InvitePanelProps) {
         <Button
           variant="ghost"
           onClick={copy}
-          className="neu-raised h-10 flex-1 rounded-full bg-background active:neu-pressed"
+          className="stock stock-press active:stock-press-active h-10 flex-1 rounded-lg"
         >
           {copied ? <Check className="text-primary-strong" /> : <Copy />}
           {copied ? "Copied" : "Copy link"}
@@ -74,7 +74,7 @@ export function InvitePanel({ circle }: InvitePanelProps) {
           <Button
             variant="ghost"
             onClick={share}
-            className="neu-raised h-10 flex-1 rounded-full bg-background active:neu-pressed"
+            className="stock stock-press active:stock-press-active h-10 flex-1 rounded-lg"
           >
             <Share2 /> Share
           </Button>

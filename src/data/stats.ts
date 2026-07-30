@@ -1,66 +1,90 @@
+import { normalizeCadence, type Cadence } from "@/lib/cadence";
 import { goalFor } from "@/lib/completion";
 import { toDayKey, todayKey, type DayKey } from "@/lib/days";
+import { carryIsContiguous, type Carry } from "@/lib/retention";
 import { intersectDoneDays } from "@/lib/shared";
-import { currentStreak, bestStreak, type ScheduleSpec, type Streak } from "@/lib/streaks";
-import { doneDaySet, logByDay, type DayLog } from "./checkins";
+import { bestStreak, currentStreak, totalDone } from "@/lib/streaks";
+import { doneDaySet, readCarry, retainedLog, type DayLog } from "./checkins";
 import { circleMembers, type Member } from "./members";
 import type { HabitEntry, LoadedHabit } from "./types";
 
 export interface MemberStats {
   member: Member;
+  /** Retained window only — 30 days. */
   log: Map<DayKey, DayLog>;
   doneDays: Set<DayKey>;
   /** Raw logged value per day — feeds duel volume and partials. */
   values: Map<DayKey, number>;
-  streak: Streak;
-  best: Streak;
+  streak: number;
+  best: number;
+  total: number;
 }
 
 export interface HabitStats {
-  schedule: ScheduleSpec;
+  cadence: Cadence;
   createdDay: DayKey;
+  today: DayKey;
   goal: number;
   members: MemberStats[];
   me: MemberStats;
   /** Only meaningful for shared habits with 2+ members. */
-  combinedStreak: Streak;
+  combinedStreak: number;
   isShared: boolean;
 }
 
-/** The stored schedule CoMap, narrowed to the pure-logic shape. */
-export function toScheduleSpec(habit: LoadedHabit): ScheduleSpec {
-  const schedule = habit.schedule;
-  if (schedule.type === "weekdays") return { type: "weekdays", days: schedule.days ?? [] };
-  if (schedule.type === "timesPerWeek") {
-    return { type: "timesPerWeek", perWeek: schedule.perWeek ?? 1 };
-  }
-  return { type: "daily" };
+/** A habit's cadence, defaulting to daily for anything written without one. */
+export function habitCadence(habit: Pick<LoadedHabit, "everyDays">): Cadence {
+  return normalizeCadence(habit.everyDays);
+}
+
+export function habitCreatedDay(habit: Pick<LoadedHabit, "createdAt">): DayKey {
+  return toDayKey(new Date(habit.createdAt));
 }
 
 function statsFor(
   habit: LoadedHabit,
   member: Member,
-  schedule: ScheduleSpec,
+  cadence: Cadence,
   createdDay: DayKey,
-  weekStartsOn: number,
+  today: DayKey,
 ): MemberStats {
-  const log = logByDay(habit, member.id);
+  const log = retainedLog(habit, member.id, today);
   const doneDays = doneDaySet(log, habit);
   const values = new Map([...log].map(([day, entry]) => [day, entry.value]));
-  const streakInput = {
+  const input = {
     doneDays,
-    schedule,
-    today: todayKey(),
+    cadence,
+    today,
     createdDay,
-    weekStartsOn,
+    carry: readCarry(habit, member.id),
   };
   return {
     member,
     log,
     doneDays,
     values,
-    streak: currentStreak(streakInput),
-    best: bestStreak(streakInput),
+    streak: currentStreak(input),
+    best: bestStreak(input),
+    total: totalDone(input),
+  };
+}
+
+/**
+ * The combined run needs a carry too, or a shared streak would collapse to 30
+ * days. If every member's summary is contiguous, the intersection's run at the
+ * cut is at least the shortest of theirs — which is exactly `min`.
+ */
+function combinedCarry(habit: LoadedHabit, members: Member[], today: DayKey): Carry | null {
+  const carries = members.map((member) => readCarry(habit, member.id));
+  if (carries.some((carry) => !carryIsContiguous(carry, today))) return null;
+  const streak = Math.min(...carries.map((carry) => carry!.streak));
+  return {
+    throughDay: carries[0]!.throughDay,
+    streak,
+    // `best` and `totalDone` aren't derivable from an intersection of
+    // summaries; only the combined *current* streak is ever displayed.
+    best: streak,
+    totalDone: 0,
   };
 }
 
@@ -69,40 +93,39 @@ function statsFor(
  * when shared, for every circle member. Cards, duels and insights all read
  * from here so there is exactly one definition of "done".
  */
-export function habitStats(
-  entry: HabitEntry,
-  myId: string,
-  myName: string,
-  weekStartsOn: number,
-): HabitStats {
+export function habitStats(entry: HabitEntry, myId: string, myName: string): HabitStats {
   const { habit, circle } = entry;
-  const schedule = toScheduleSpec(habit);
-  const createdDay = toDayKey(new Date(habit.createdAt));
+  const cadence = habitCadence(habit);
+  const createdDay = habitCreatedDay(habit);
+  const today = todayKey();
 
   const roster: Member[] = circle
     ? circleMembers(circle, myId)
     : [{ id: myId, name: myName, isMe: true }];
   // A circle whose members haven't synced yet must still show my own data.
-  const members = (roster.some((member) => member.isMe)
+  const present = roster.some((member) => member.isMe)
     ? roster
-    : [{ id: myId, name: myName, isMe: true }, ...roster]
-  ).map((member) => statsFor(habit, member, schedule, createdDay, weekStartsOn));
+    : [{ id: myId, name: myName, isMe: true }, ...roster];
+  const members = present.map((member) =>
+    statsFor(habit, member, cadence, createdDay, today),
+  );
 
   const me = members.find((stats) => stats.member.isMe) ?? members[0];
   const combined = intersectDoneDays(members.map((stats) => stats.doneDays));
 
   return {
-    schedule,
+    cadence,
     createdDay,
+    today,
     goal: goalFor(habit.kind, habit.target),
     members,
     me,
     combinedStreak: currentStreak({
       doneDays: combined,
-      schedule,
-      today: todayKey(),
+      cadence,
+      today,
       createdDay,
-      weekStartsOn,
+      carry: combinedCarry(habit, present, today),
     }),
     isShared: Boolean(circle) && members.length > 1,
   };
