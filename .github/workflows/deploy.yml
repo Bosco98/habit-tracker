@@ -28,8 +28,8 @@ jobs:
       - run: pnpm test
       # Served from the apex domain in public/CNAME, so the base stays "/".
       - run: pnpm build
-      # SPA fallback so /app and its client-side routes survive a hard refresh.
-      - run: cp dist/index.html dist/404.html && touch dist/.nojekyll
+      # Give /app a real 200 entry point; 404.html handles deeper client routes.
+      - run: mkdir -p dist/app && cp dist/index.html dist/app/index.html && cp dist/index.html dist/404.html && touch dist/.nojekyll
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
