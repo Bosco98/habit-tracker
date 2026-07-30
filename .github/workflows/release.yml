@@ -66,17 +66,28 @@ jobs:
       - name: Test
         run: pnpm test
 
+      - name: Configure Apple signing when secrets exist
+        if: runner.os == 'macOS'
+        shell: bash
+        env:
+          APPLE_CERTIFICATE_VALUE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD_VALUE: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          APPLE_ID_VALUE: ${{ secrets.APPLE_ID }}
+          APPLE_PASSWORD_VALUE: ${{ secrets.APPLE_PASSWORD }}
+          APPLE_TEAM_ID_VALUE: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          if [ -n "$APPLE_CERTIFICATE_VALUE" ]; then
+            printf '%s\n' "APPLE_CERTIFICATE=$APPLE_CERTIFICATE_VALUE" >> "$GITHUB_ENV"
+            printf '%s\n' "APPLE_CERTIFICATE_PASSWORD=$APPLE_CERTIFICATE_PASSWORD_VALUE" >> "$GITHUB_ENV"
+            printf '%s\n' "APPLE_ID=$APPLE_ID_VALUE" >> "$GITHUB_ENV"
+            printf '%s\n' "APPLE_PASSWORD=$APPLE_PASSWORD_VALUE" >> "$GITHUB_ENV"
+            printf '%s\n' "APPLE_TEAM_ID=$APPLE_TEAM_ID_VALUE" >> "$GITHUB_ENV"
+          fi
+
       - name: Build and publish installers
         uses: tauri-apps/tauri-action@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # Optional Apple Developer secrets. When absent, macOS uses the
-          # ad-hoc identity configured in tauri.conf.json.
-          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
-          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
-          APPLE_ID: ${{ secrets.APPLE_ID }}
-          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         with:
           tagName: ${{ env.RELEASE_TAG }}
           releaseName: Habits ${{ env.RELEASE_TAG }}
