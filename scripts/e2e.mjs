@@ -238,7 +238,7 @@ const circleIsReadOnly =
 const circleHasPulse = (await A.getByText("Circle pulse", { exact: true }).count()) === 1;
 
 // React to the partner's check-in
-const reactBtn = A.getByRole("button", { name: /React 👏/ }).first();
+const reactBtn = A.getByRole("button", { name: /Support for .* check-in/ }).first();
 if ((await reactBtn.count()) > 0) {
   await reactBtn.click();
   await A.waitForTimeout(800);

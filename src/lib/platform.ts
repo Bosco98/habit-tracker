@@ -41,6 +41,7 @@ export function invokeDesktop(cmd: string, args?: Record<string, unknown>): void
 }
 
 let syncTimer: ReturnType<typeof setTimeout> | undefined;
+export const DESKTOP_PEER_SYNC_DELAY_MS = 750;
 
 /**
  * The tray popover and the main window are separate webviews, each running its
@@ -49,15 +50,15 @@ let syncTimer: ReturnType<typeof setTimeout> | undefined;
  * invisible to the other until it re-reads — which is why the two lists drifted.
  *
  * Signed-up accounts reconcile through the sync relay; anonymous ones have no
- * relay at all, so the shell reloads the *other* window instead. Debounced, so
- * a burst of taps costs one reload.
+ * relay at all, so the shell reloads the *other* window instead. Give the
+ * IndexedDB writer time to commit first; a burst of writes still costs one reload.
  */
 export function syncDesktopPeers(): void {
   if (!isDesktop()) return;
   clearTimeout(syncTimer);
   syncTimer = setTimeout(() => {
     invokeDesktop("sync_peers", { from: isWidget() ? "widget" : "main" });
-  }, 400);
+  }, DESKTOP_PEER_SYNC_DELAY_MS);
 }
 
 /**

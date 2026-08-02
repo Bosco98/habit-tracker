@@ -1,4 +1,6 @@
 import { Check } from "lucide-react";
+import { AppIcon } from "@/components/app-icon";
+import { NoteCheckIn } from "@/components/habits/note-check-in";
 import { TimerControl } from "@/components/habits/timer-control";
 import { valueForDay } from "@/data/checkins";
 import { logCheckIn } from "@/data/mutations";
@@ -18,16 +20,40 @@ interface WidgetRowProps {
 export function WidgetRow({ entry, stats, today }: WidgetRowProps) {
   const { habit } = entry;
   const value = valueForDay(stats.me.log, today);
+  const note = stats.me.log.get(today)?.note;
   const done = value >= stats.goal;
   const isTimer = habit.kind === "timer";
   const dueToday = isDueDay(today, stats.createdDay, stats.cadence);
 
+  if (habit.kind === "note") {
+    return (
+      <li className="stock flex flex-col gap-1.5 rounded-lg p-2">
+        <div className="flex min-w-0 items-center gap-2">
+          <AppIcon value={habit.emoji} className="size-4 shrink-0" strokeWidth={2.4} />
+          <span className="min-w-0 flex-1 truncate text-sm font-medium">{habit.name}</span>
+          <span className="tnum text-muted-foreground shrink-0 text-xs">
+            {stats.isShared ? stats.combinedStreak : stats.me.streak}d
+          </span>
+        </div>
+        <NoteCheckIn
+          note={note}
+          done={done}
+          disabled={!dueToday}
+          compact
+          label={habit.name}
+          onSave={(next) =>
+            logCheckIn(habit, today, 1, { note: next, edited: done })
+          }
+          onClear={() => logCheckIn(habit, today, 0)}
+        />
+      </li>
+    );
+  }
+
   if (isTimer) {
     return (
       <li className="stock flex items-center gap-2 rounded-lg py-1.5 pr-1.5 pl-2.5">
-        <span aria-hidden className="text-base leading-none">
-          {habit.emoji}
-        </span>
+        <AppIcon value={habit.emoji} className="size-4 shrink-0" strokeWidth={2.4} />
         <span className="min-w-0 flex-1 truncate text-sm font-medium">{habit.name}</span>
         <TimerControl
           timerId={habit.$jazz.id}
@@ -70,9 +96,7 @@ export function WidgetRow({ entry, stats, today }: WidgetRowProps) {
           done && "bg-primary text-primary-foreground",
         )}
       >
-        <span aria-hidden className="text-base leading-none">
-          {habit.emoji}
-        </span>
+        <AppIcon value={habit.emoji} className="size-4 shrink-0" strokeWidth={2.4} />
         <span className="min-w-0 flex-1 truncate text-sm font-medium">{habit.name}</span>
         <span className={cn("tnum text-xs", !done && "text-muted-foreground")}>
           {dueToday

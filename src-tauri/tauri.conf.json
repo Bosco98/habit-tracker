@@ -46,6 +46,7 @@
   },
   "bundle": {
     "active": true,
+    "createUpdaterArtifacts": true,
     "targets": ["app", "dmg", "nsis", "appimage", "deb"],
     "macOS": {
       "signingIdentity": "-"
@@ -57,5 +58,16 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ]
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDcwNUY4QTBFNTE0QTNGM0MKUldROFAwcFJEb3BmY01TZkpZcGhJWWZEbHZWcFpZRG1VSW5wdldNWHdaK2EwZmNvY1p4YmltRmYK",
+      "endpoints": [
+        "https://github.com/Bosco98/habit-tracker/releases/latest/download/latest.json"
+      ],
+      "windows": {
+        "installMode": "passive"
+      }
+    }
   }
 }

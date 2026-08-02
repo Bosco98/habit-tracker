@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { ChartNoAxesCombined } from "lucide-react";
 import { EmptyState } from "@/components/empty-state";
 import { HabitInsightRow } from "@/components/insights/habit-insight-row";
 import {
@@ -138,7 +139,7 @@ export function Insights() {
         <TopBar title="Insights" progress={null} />
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-5 px-4 pt-4 pb-24 md:pb-8">
           <EmptyState
-            emoji="📊"
+            icon={<ChartNoAxesCombined className="size-6" strokeWidth={2.5} />}
             title="Nothing to show yet"
             hint="Track a habit for a few days and the patterns show up here."
           />

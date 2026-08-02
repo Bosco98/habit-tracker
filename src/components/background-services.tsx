@@ -4,6 +4,7 @@ import {
   sendNotification,
 } from "@tauri-apps/plugin-notification";
 import { AchievementCelebration } from "@/components/achievement-celebration";
+import { DesktopUpdateBanner } from "@/components/desktop-updater";
 import { readAchievementEvents } from "@/data/achievements";
 import { circleSaveEvents } from "@/data/circle-notifications";
 import {
@@ -22,6 +23,7 @@ import {
   writeCircleNotifications,
 } from "@/lib/circle-notification-settings";
 import { initializeOpenAtLogin } from "@/lib/autostart";
+import { startDesktopUpdater } from "@/lib/desktop-updater";
 import { isDesktop } from "@/lib/platform";
 import {
   collapseTrophyAwards,
@@ -92,6 +94,8 @@ export function BackgroundServices() {
   useEffect(() => {
     void initializeOpenAtLogin();
   }, []);
+
+  useEffect(() => startDesktopUpdater(), []);
 
   useEffect(() => {
     if (
@@ -176,9 +180,12 @@ export function BackgroundServices() {
   }, [account, myId, trophySignature]);
 
   return (
-    <AchievementCelebration
-      award={trophyQueue[0] ?? null}
-      onComplete={completeTrophy}
-    />
+    <>
+      <AchievementCelebration
+        award={trophyQueue[0] ?? null}
+        onComplete={completeTrophy}
+      />
+      <DesktopUpdateBanner />
+    </>
   );
 }

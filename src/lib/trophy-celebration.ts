@@ -80,7 +80,7 @@ export function trophyCelebrationCopy(award: TrophyAward): {
       eyebrow: "Circle honor earned",
       title: award.honor ? honorLabel[award.honor] : "New honor",
       detail: award.circleName
-        ? `${award.circleEmoji ?? "🤝"} ${award.circleName} · Seven-day checkpoint`
+        ? `${award.circleName} · Seven-day checkpoint`
         : "A new Circle honor is in your cabinet.",
     };
   }

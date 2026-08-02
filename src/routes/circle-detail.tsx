@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { ArrowLeft, LogOut, Pencil, Plus, Trash2 } from "lucide-react";
 import { Link, useNavigate, useParams } from "react-router";
+import { AppIcon } from "@/components/app-icon";
 import { ActivityFeed } from "@/components/circles/activity-feed";
 import { AllInCelebration } from "@/components/circles/all-in-celebration";
 import { CircleHabitList } from "@/components/circles/circle-habit-list";
@@ -113,12 +114,12 @@ export function CircleDetail() {
     else createSharedHabit(circle, input);
   };
 
-  const react = (item: ActivityItem, emoji: string) =>
+  const react = (item: ActivityItem, icon: string) =>
     addReaction(circle, {
       habitId: item.habitId,
       targetAccountId: item.accountId,
       forDay: item.forDay,
-      emoji,
+      emoji: icon,
     });
 
   const leave = () => {
@@ -151,8 +152,8 @@ export function CircleDetail() {
           >
             <ArrowLeft className="size-4" />
           </Link>
-          <span className="stock-flat flex size-10 items-center justify-center rounded-lg text-lg">
-            {circle.emoji}
+          <span className="stock-flat flex size-10 items-center justify-center rounded-lg">
+            <AppIcon value={circle.emoji} kind="circle" className="size-5" strokeWidth={2.4} />
           </span>
           <div className="min-w-0 flex-1">
             <h2 className="truncate font-semibold">{circle.name}</h2>

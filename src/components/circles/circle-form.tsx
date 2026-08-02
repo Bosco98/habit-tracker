@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { EmojiPicker } from "@/components/emoji-picker";
+import { CIRCLE_ICON_OPTIONS, normalizeAppIcon } from "@/lib/app-icons";
+import { IconPicker } from "@/components/icon-picker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,7 +12,6 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import type { LoadedCircle } from "@/data/types";
-import { CIRCLE_EMOJI } from "@/lib/habit-emoji";
 
 export interface CircleInput {
   name: string;
@@ -27,7 +27,7 @@ interface CircleFormProps {
 
 export function CircleForm({ open, onOpenChange, circle, onSubmit }: CircleFormProps) {
   const [name, setName] = useState(circle?.name ?? "");
-  const [emoji, setEmoji] = useState(circle?.emoji ?? CIRCLE_EMOJI[0]);
+  const [icon, setIcon] = useState(() => normalizeAppIcon(circle?.emoji, "circle"));
 
   const valid = name.trim().length > 0;
 
@@ -45,7 +45,7 @@ export function CircleForm({ open, onOpenChange, circle, onSubmit }: CircleFormP
           onSubmit={(e) => {
             e.preventDefault();
             if (!valid) return;
-            onSubmit({ name: name.trim(), emoji });
+            onSubmit({ name: name.trim(), emoji: icon });
             onOpenChange(false);
           }}
         >
@@ -61,7 +61,12 @@ export function CircleForm({ open, onOpenChange, circle, onSubmit }: CircleFormP
             />
           </div>
 
-          <EmojiPicker value={emoji} onChange={setEmoji} options={CIRCLE_EMOJI} />
+          <IconPicker
+            value={icon}
+            onChange={setIcon}
+            options={CIRCLE_ICON_OPTIONS}
+            kind="circle"
+          />
 
           <Button type="submit" disabled={!valid} className="stock h-12 rounded-lg text-base">
             {circle ? "Save changes" : "Create circle"}

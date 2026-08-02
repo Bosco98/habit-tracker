@@ -1,8 +1,8 @@
-export type HabitKind = "binary" | "count" | "timer";
+export type HabitKind = "binary" | "note" | "count" | "timer";
 
 /** The value a day's log must reach to count as done. */
 export function goalFor(kind: HabitKind, target?: number): number {
-  if (kind === "binary") return 1;
+  if (kind === "binary" || kind === "note") return 1;
   return target && target > 0 ? target : 1;
 }
 

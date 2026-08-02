@@ -7,7 +7,7 @@ export const CheckIn = co.map({
   /** Wall-clock ms when it was actually logged (backfill signal). */
   loggedAt: z.number(),
   editedAt: z.optional(z.number()),
-  /** binary: 1 · count: units · timer: seconds. */
+  /** binary/note: 1 · count: units · timer: seconds. */
   value: z.number(),
   note: z.optional(z.string()),
 });
@@ -29,7 +29,7 @@ export const Carry = co.map({
 export const Habit = co.map({
   name: z.string(),
   emoji: z.string(),
-  kind: z.enum(["binary", "count", "timer"]),
+  kind: z.enum(["binary", "note", "count", "timer"]),
   /** count goal / timer seconds. */
   target: z.optional(z.number()),
   /**

@@ -1,6 +1,7 @@
 import {
   ArrowRight,
   Bell,
+  BookOpen,
   Check,
   Code2,
   Clock3,
@@ -8,8 +9,12 @@ import {
   Laptop,
   LockKeyhole,
   MonitorDown,
+  HeartHandshake,
+  type LucideIcon,
   ShieldCheck,
   Sparkles,
+  Sprout,
+  Timer,
   Users,
 } from "lucide-react";
 import { RELEASES_URL, REPOSITORY_URL } from "@/lib/links";
@@ -140,7 +145,7 @@ export function Landing() {
             <div className="flex flex-col gap-6">
               <section className="stock overflow-hidden rounded-xl">
                 <div className="bg-chart-3 text-primary-foreground flex items-center gap-3 border-b-2 border-line p-4">
-                  <span className="text-3xl">🤝</span>
+                  <HeartHandshake className="size-8" strokeWidth={2.4} />
                   <div>
                     <h3 className="text-xl font-black">Weekend crew</h3>
                     <p className="text-sm font-bold">3 people · 2 shared habits</p>
@@ -310,7 +315,9 @@ function HeroPunchCard() {
   return (
     <div className="relative mx-auto w-full max-w-[42rem] lg:mr-0">
       <div className="landing-note absolute -top-8 right-0 z-10 hidden rotate-3 border-2 border-line bg-chart-4 px-4 py-3 text-xs font-black text-primary-foreground shadow-[4px_4px_0_var(--stock-shadow)] sm:block">
-        MAYA JUST CHECKED IN ✦
+        <span className="flex items-center gap-2">
+          MAYA JUST CHECKED IN <Check className="size-3.5" strokeWidth={3} />
+        </span>
       </div>
       <div className="stock relative rotate-[-1.5deg] overflow-hidden rounded-xl bg-card">
         <div className="flex items-center gap-3 border-b-2 border-line bg-chart-1 p-4 text-primary-foreground sm:p-5">
@@ -321,9 +328,9 @@ function HeroPunchCard() {
           <p className="tnum ml-auto text-3xl font-black">2 / 3</p>
         </div>
         <div className="space-y-3 p-4 sm:p-5">
-          <HabitMock emoji="🌱" name="Walk outside" detail="Every day" action="DONE" hue="var(--chart-4)" />
-          <HabitMock emoji="📚" name="Read" detail="12 of 20 pages" action="+1" hue="var(--chart-2)" />
-          <HabitMock emoji="🧘" name="Meditate" detail="8m of 10m" action="2:00" hue="var(--chart-3)" />
+          <HabitMock icon={Sprout} name="Walk outside" detail="Every day" action="DONE" hue="var(--chart-4)" />
+          <HabitMock icon={BookOpen} name="Read" detail="12 of 20 pages" action="+1" hue="var(--chart-2)" />
+          <HabitMock icon={Timer} name="Meditate" detail="8m of 10m" action="2:00" hue="var(--chart-3)" />
         </div>
         <div className="tear p-4 sm:p-5">
           <div className="mb-3 flex items-center justify-between gap-3">
@@ -374,13 +381,13 @@ function HeroPunchCard() {
 }
 
 function HabitMock({
-  emoji,
+  icon: Icon,
   name,
   detail,
   action,
   hue,
 }: {
-  emoji: string;
+  icon: LucideIcon;
   name: string;
   detail: string;
   action: string;
@@ -388,7 +395,7 @@ function HabitMock({
 }) {
   return (
     <div className="border-line flex items-center gap-3 rounded-lg border-2 p-3">
-      <span className="text-2xl">{emoji}</span>
+      <Icon className="size-6 shrink-0" strokeWidth={2.4} />
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-black">{name}</p>
         <p className="text-muted-foreground truncate text-xs font-semibold">{detail}</p>

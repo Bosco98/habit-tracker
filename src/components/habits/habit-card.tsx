@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { Users } from "lucide-react";
+import { AppIcon } from "@/components/app-icon";
 import { PunchStrip } from "@/components/punch-strip";
 import { valueForDay } from "@/data/checkins";
 import { logCheckIn } from "@/data/mutations";
@@ -14,6 +15,7 @@ import { cn } from "@/lib/utils";
 import { CountStepper } from "./count-stepper";
 import { HabitMenu } from "./habit-menu";
 import { MemberAvatars } from "./member-avatars";
+import { NoteCheckIn } from "./note-check-in";
 import { PunchButton } from "./punch-button";
 import { StreakStamp } from "./streak-stamp";
 import { TimerControl } from "./timer-control";
@@ -64,6 +66,7 @@ export function HabitCard({
     [stats, today],
   );
 
+  const todayLog = stats.me.log.get(today);
   const value = valueForDay(stats.me.log, today);
   const streak = stats.isShared ? stats.combinedStreak : stats.me.streak;
   const dueToday = cells.at(-1)?.due ?? true;
@@ -85,9 +88,7 @@ export function HabitCard({
         className="border-line flex items-center gap-2 border-b-2 py-1.5 pr-1 pl-3"
         style={{ backgroundColor: hue, color: "var(--on-hue)" }}
       >
-        <span aria-hidden className="text-sm leading-none">
-          {habit.emoji}
-        </span>
+        <AppIcon value={habit.emoji} className="size-4 shrink-0" strokeWidth={2.5} />
         <button
           type="button"
           onClick={onOpen}
@@ -158,6 +159,23 @@ export function HabitCard({
             />
           )}
         </div>
+
+        {habit.kind === "note" && (
+          <NoteCheckIn
+            note={todayLog?.note}
+            done={value >= stats.goal}
+            disabled={!dueToday}
+            hue={hue}
+            label={habit.name}
+            onSave={(note) =>
+              logCheckIn(habit, today, 1, {
+                note,
+                edited: value >= stats.goal,
+              })
+            }
+            onClear={() => logCheckIn(habit, today, 0)}
+          />
+        )}
 
         <PunchStrip cells={cells} today={today} label={habit.name} hue={hue} />
 

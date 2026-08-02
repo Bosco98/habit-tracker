@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { IconPicker } from "@/components/icon-picker";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -14,10 +15,9 @@ import type { HabitInput } from "@/data/mutations";
 import type { LoadedCircle, LoadedHabit } from "@/data/types";
 import { normalizeCadence } from "@/lib/cadence";
 import type { HabitKind } from "@/lib/completion";
+import { HABIT_ICON_OPTIONS, normalizeAppIcon } from "@/lib/app-icons";
 import { cn } from "@/lib/utils";
 import { CadencePicker } from "./cadence-picker";
-import { HABIT_EMOJI } from "@/lib/habit-emoji";
-import { EmojiPicker } from "@/components/emoji-picker";
 
 interface HabitFormProps {
   open: boolean;
@@ -40,7 +40,7 @@ export function HabitForm({
   onSubmit,
 }: HabitFormProps) {
   const [name, setName] = useState(habit?.name ?? "");
-  const [emoji, setEmoji] = useState(habit?.emoji ?? HABIT_EMOJI[0]);
+  const [icon, setIcon] = useState(() => normalizeAppIcon(habit?.emoji, "habit"));
   const [kind, setKind] = useState<HabitKind>(habit?.kind ?? "binary");
   const [target, setTarget] = useState(() =>
     habit?.kind === "timer"
@@ -53,21 +53,21 @@ export function HabitForm({
   const [circleId, setCircleId] = useState<string | null>(defaultCircleId);
 
   const showTargets = !habit && circles.length > 0;
-  const valid = name.trim().length > 0 && (kind === "binary" || Number(target) >= 1);
+  const quantified = kind === "count" || kind === "timer";
+  const valid = name.trim().length > 0 && (!quantified || Number(target) >= 1);
 
   const submit = () => {
     if (!valid) return;
     onSubmit(
       {
         name: name.trim(),
-        emoji,
+        emoji: icon,
         kind,
-        target:
-          kind === "binary"
-            ? undefined
-            : kind === "timer"
-              ? Number(target) * 60
-              : Number(target),
+        target: !quantified
+          ? undefined
+          : kind === "timer"
+            ? Number(target) * 60
+            : Number(target),
         cadence: normalizeCadence(everyDays),
       },
       showTargets ? circleId : defaultCircleId,
@@ -108,7 +108,7 @@ export function HabitForm({
             />
           </div>
 
-          <EmojiPicker value={emoji} onChange={setEmoji} />
+          <IconPicker value={icon} onChange={setIcon} options={HABIT_ICON_OPTIONS} />
 
           {showTargets && (
             <div className="flex flex-col gap-2">
@@ -121,7 +121,7 @@ export function HabitForm({
                   { value: "personal", label: "Just me" },
                   ...circles.map((circle) => ({
                     value: circle.$jazz.id,
-                    label: `${circle.emoji} ${circle.name}`,
+                    label: circle.name,
                   })),
                 ]}
               />
@@ -136,11 +136,17 @@ export function HabitForm({
               onChange={setKind}
               options={[
                 { value: "binary", label: "Check" },
+                { value: "note", label: "Note" },
                 { value: "count", label: "Count" },
                 { value: "timer", label: "Timer" },
               ]}
             />
-            {kind !== "binary" && (
+            {kind === "note" && (
+              <p className="text-muted-foreground text-xs">
+                A check-in includes a short note about what you did.
+              </p>
+            )}
+            {quantified && (
               <div className="flex items-center gap-2">
                 <Input
                   type="number"

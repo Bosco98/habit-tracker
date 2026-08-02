@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { AppIcon } from "@/components/app-icon";
 import {
   Sheet,
   SheetContent,
@@ -10,6 +11,7 @@ import { StatTile } from "@/components/insights/stat-tile";
 import { habitStats } from "@/data/stats";
 import type { HabitEntry } from "@/data/types";
 import { describeCadence } from "@/lib/cadence";
+import { relativeDay } from "@/lib/days";
 import { completionRate, momentum } from "@/lib/insights";
 import { RETENTION_DAYS, retentionWindow } from "@/lib/retention";
 import { PeerRow } from "./peer-row";
@@ -43,6 +45,29 @@ export function HabitDetailSheet({
     };
   }, [stats]);
 
+  const notes = useMemo(
+    () =>
+      stats
+        ? stats.members
+            .flatMap((member) =>
+              [...member.log].flatMap(([day, log]) =>
+                log.note
+                  ? [{
+                      key: `${member.member.id}-${day}`,
+                      memberName: member.member.isMe ? "You" : member.member.name,
+                      day,
+                      note: log.note,
+                      loggedAt: log.loggedAt,
+                    }]
+                  : [],
+              ),
+            )
+            .sort((a, b) => b.loggedAt - a.loggedAt)
+            .slice(0, 10)
+        : [],
+    [stats],
+  );
+
   if (!entry || !stats || !view) return null;
 
   const delta = Math.round(view.trend.delta * 100);
@@ -55,7 +80,7 @@ export function HabitDetailSheet({
       >
         <SheetHeader>
           <SheetTitle className="flex items-center gap-2">
-            <span className="text-xl">{entry.habit.emoji}</span>
+            <AppIcon value={entry.habit.emoji} className="size-5" strokeWidth={2.4} />
             {entry.habit.name}
           </SheetTitle>
           <SheetDescription>
@@ -102,6 +127,27 @@ export function HabitDetailSheet({
               />
             ))}
           </div>
+
+          {notes.length > 0 && (
+            <section className="flex flex-col gap-2" aria-labelledby="check-in-notes-title">
+              <h3
+                id="check-in-notes-title"
+                className="text-muted-foreground text-xs font-semibold"
+              >
+                Check-in notes
+              </h3>
+              <ul className="flex flex-col gap-2">
+                {notes.map((note) => (
+                  <li key={note.key} className="stock-flat rounded-lg px-3 py-2.5">
+                    <p className="text-muted-foreground text-[11px] font-semibold">
+                      {note.memberName} · {relativeDay(note.day, stats.today)}
+                    </p>
+                    <p className="mt-1 text-sm leading-relaxed break-words">{note.note}</p>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
         </div>
       </SheetContent>
     </Sheet>

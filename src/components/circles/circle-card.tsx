@@ -1,5 +1,6 @@
 import { ChevronRight } from "lucide-react";
 import { Link } from "react-router";
+import { AppIcon } from "@/components/app-icon";
 import type { LoadedCircle } from "@/data/types";
 
 interface CircleCardProps {
@@ -14,8 +15,8 @@ export function CircleCard({ circle, memberCount, habitCount }: CircleCardProps)
       to={`/circle/${circle.$jazz.id}`}
       className="stock stock-press active:stock-press-active flex items-center gap-3 rounded-xl p-3"
     >
-      <span className="stock-flat flex size-11 shrink-0 items-center justify-center rounded-lg text-xl">
-        {circle.emoji}
+      <span className="stock-flat flex size-11 shrink-0 items-center justify-center rounded-lg">
+        <AppIcon value={circle.emoji} kind="circle" className="size-5" strokeWidth={2.4} />
       </span>
       <div className="min-w-0 flex-1">
         <p className="truncate font-medium">{circle.name}</p>

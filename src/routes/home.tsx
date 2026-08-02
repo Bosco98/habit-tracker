@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { AppIcon } from "@/components/app-icon";
 import { EmptyState } from "@/components/empty-state";
 import { HabitDetailSheet } from "@/components/habits/habit-detail-sheet";
 import { HabitForm } from "@/components/habits/habit-form";
@@ -90,7 +91,7 @@ export function Home() {
       <div className="flex flex-col gap-6 px-4 pt-4">
         {isEmpty ? (
           <EmptyState
-            emoji="🌱"
+            icon={<AppIcon value="sprout" className="size-6" strokeWidth={2.5} />}
             title="No habits yet"
             hint="Start with one. Small, and yours."
             actionLabel="Create a habit"

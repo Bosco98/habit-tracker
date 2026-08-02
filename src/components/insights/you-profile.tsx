@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
-import { Award, Crown, Heart, ShieldCheck, Sparkles, Trophy, Users } from "lucide-react";
+import { Award, Crown, Heart, ShieldCheck, Sparkles, Trophy, UserRound, Users } from "lucide-react";
+import { AppIcon } from "@/components/app-icon";
 import {
   currentCirclePulse,
   readAchievementEvents,
@@ -132,8 +133,8 @@ export function YouProfile({
     <section className="flex flex-col gap-3" aria-labelledby="you-profile-title">
       <div className="stock overflow-hidden rounded-xl">
         <div className="bg-chart-1 text-primary-foreground flex flex-wrap items-center gap-4 p-4">
-          <div className="border-line flex size-12 items-center justify-center rounded-xl border-2 bg-white text-2xl">
-            {account.profile.name?.trim() ? "⚡" : "🌱"}
+          <div className="border-line flex size-12 items-center justify-center rounded-xl border-2 bg-white text-black">
+            <UserRound className="size-6" strokeWidth={2.4} />
           </div>
           <div className="min-w-0 flex-1">
             <h2 id="you-profile-title" className="truncate text-xl font-black">
@@ -216,7 +217,12 @@ export function YouProfile({
                   key={honor.key}
                   className="bg-chart-4 text-primary-foreground border-line rounded-full border-2 px-2.5 py-1 text-xs font-extrabold"
                 >
-                  {honor.circleEmoji} {honorLabel[honor.honor]} · {honor.circleName}
+                  <AppIcon
+                    value={honor.circleEmoji}
+                    kind="circle"
+                    className="mr-1 inline size-3.5"
+                  />
+                  {honorLabel[honor.honor]} · {honor.circleName}
                 </span>
               ))}
             </div>
@@ -239,7 +245,11 @@ export function YouProfile({
               >
                 <span className="bg-chart-3 text-primary-foreground border-line flex size-9 items-center justify-center rounded-lg border-2">
                   {trophy.kind === "circleHonor" ? (
-                    trophy.circleEmoji ?? <Award className="size-4" />
+                    trophy.circleEmoji ? (
+                      <AppIcon value={trophy.circleEmoji} kind="circle" className="size-4" />
+                    ) : (
+                      <Award className="size-4" />
+                    )
                   ) : (
                     <Trophy className="size-4" />
                   )}

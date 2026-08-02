@@ -37,7 +37,7 @@ describe("Circle remote-save notifications", () => {
     expect(seen.has("1")).toBe(true);
   });
 
-  it("describes count, timer, binary, and reset values", () => {
+  it("describes count, timer, binary, note, and reset values", () => {
     expect(notificationBody(event("1"))).toBe("Maya updated Read to 4 of 10.");
     expect(
       notificationBody({ ...event("1"), habitKind: "timer", value: 125, goal: 180 }),
@@ -45,6 +45,13 @@ describe("Circle remote-save notifications", () => {
     expect(notificationBody({ ...event("1"), habitKind: "binary" })).toBe(
       "Maya checked in on Read.",
     );
+    expect(
+      notificationBody({
+        ...event("1"),
+        habitKind: "note",
+        note: "Bench press 3 × 8",
+      }),
+    ).toBe("Maya checked in on Read: Bench press 3 × 8");
     expect(notificationBody({ ...event("1"), value: 0 })).toBe("Maya reset Read.");
   });
 });

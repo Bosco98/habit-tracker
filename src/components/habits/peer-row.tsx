@@ -49,7 +49,7 @@ export function PeerRow({
         </span>
         <span className="text-muted-foreground tnum shrink-0 text-xs">
           {Math.round(completion * 100)}% · {stats.streak}d streak
-          {kind !== "binary" && (
+          {(kind === "count" || kind === "timer") && (
             <> · {formatValue(kind, [...stats.values.values()].reduce((a, b) => a + b, 0))}</>
           )}
         </span>

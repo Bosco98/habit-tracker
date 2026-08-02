@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Plus } from "lucide-react";
 import { useLocation } from "react-router";
+import { AppIcon } from "@/components/app-icon";
 import { CircleCard } from "@/components/circles/circle-card";
 import { CircleForm, type CircleInput } from "@/components/circles/circle-form";
 import { EmptyState } from "@/components/empty-state";
@@ -40,7 +41,7 @@ export function Circles() {
         <TopBar title="Circles" progress={null} />
         <div className="px-4 pt-4">
           <EmptyState
-            emoji="🤝"
+            icon={<AppIcon value="heart-handshake" kind="circle" className="size-6" strokeWidth={2.5} />}
             title="Circles need an account"
             hint="Sharing works by syncing encrypted data to your people. Without an account nothing leaves this device, so an invite would lead nowhere. Your habits come with you when you sign up."
             actionLabel="Create an account"
@@ -69,7 +70,7 @@ export function Circles() {
 
         {circles.length === 0 ? (
           <EmptyState
-            emoji="🤝"
+            icon={<AppIcon value="heart-handshake" kind="circle" className="size-6" strokeWidth={2.5} />}
             title="No circles yet"
             hint="A circle is a shared shelf: put a habit on it and everyone in the circle keeps it with you."
             actionLabel="Create a circle"

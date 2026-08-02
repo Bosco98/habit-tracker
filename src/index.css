@@ -327,6 +327,31 @@
   overscroll-behavior: none;
 }
 
+/* Settings is a thumb-friendly bottom sheet on phones and a conventional,
+   bounded dialog on larger screens. It should never grow out of the viewport. */
+.settings-dialog {
+  max-height: min(88dvh, 52rem);
+}
+
+@media (min-width: 40rem) {
+  .settings-dialog[data-side="bottom"] {
+    inset: 50% auto auto 50%;
+    width: min(42rem, calc(100vw - 3rem));
+    max-width: none;
+    max-height: min(46rem, calc(100dvh - 3rem));
+    transform: translate(-50%, -50%);
+    border: 2px solid var(--line);
+    border-radius: 0.75rem;
+    animation: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .settings-dialog {
+    animation: none;
+  }
+}
+
 /* The tray popover is its own window — no shell chrome, no drag region.
    The window is transparent so the card's rounded corners aren't boxed in. */
 .widget,

@@ -14,6 +14,7 @@ export interface HabitInput {
 
 export function createHabit(account: WritableAccount, input: HabitInput): void {
   account.root.habits.$jazz.push(habitInit(input));
+  syncDesktopPeers();
 }
 
 /** The shape a new Habit CoMap starts from — shared by personal and circle habits. */
@@ -36,6 +37,7 @@ export function updateHabit(habit: LoadedHabit, input: HabitInput): void {
   habit.$jazz.set("kind", input.kind);
   habit.$jazz.set("target", input.target);
   habit.$jazz.set("everyDays", normalizeCadence(input.cadence.everyDays).everyDays);
+  syncDesktopPeers();
 }
 
 /**
@@ -47,24 +49,30 @@ export function logCheckIn(
   habit: LoadedHabit,
   forDay: DayKey,
   value: number,
-  options?: { edited?: boolean },
+  options?: { edited?: boolean; note?: string },
 ): void {
+  const note = options?.note?.trim();
   habit.checkIns.$jazz.push({
     forDay,
     loggedAt: Date.now(),
     value,
     editedAt: options?.edited ? Date.now() : undefined,
+    note: note || undefined,
   });
   syncDesktopPeers();
 }
 
 export function archiveHabit(habit: LoadedHabit): void {
   habit.$jazz.set("archivedAt", Date.now());
+  syncDesktopPeers();
 }
 
 export function deleteHabit(account: WritableAccount, habit: LoadedHabit): void {
   const index = account.root.habits.findIndex((h) => h?.$jazz.id === habit.$jazz.id);
-  if (index >= 0) account.root.habits.$jazz.splice(index, 1);
+  if (index >= 0) {
+    account.root.habits.$jazz.splice(index, 1);
+    syncDesktopPeers();
+  }
 }
 
 export function setDisplayName(account: WritableAccount, name: string): void {

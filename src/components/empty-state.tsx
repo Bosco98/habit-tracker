@@ -1,8 +1,9 @@
+import type { ReactNode } from "react";
 import { hueForIndex } from "@/lib/habit-color";
 import { cn } from "@/lib/utils";
 
 interface EmptyStateProps {
-  emoji: string;
+  icon: ReactNode;
   title: string;
   hint: string;
   actionLabel?: string;
@@ -10,11 +11,14 @@ interface EmptyStateProps {
 }
 
 /** One block, one action. No preview cards pretending to be data. */
-export function EmptyState({ emoji, title, hint, actionLabel, onAction }: EmptyStateProps) {
+export function EmptyState({ icon, title, hint, actionLabel, onAction }: EmptyStateProps) {
   return (
     <div className="stock flex flex-col items-center gap-3 rounded-xl px-5 py-8 text-center">
-      <span aria-hidden className="text-4xl leading-none">
-        {emoji}
+      <span
+        aria-hidden
+        className="border-line flex size-12 items-center justify-center rounded-lg border-2 bg-[var(--hue-blue)] text-[var(--on-hue)]"
+      >
+        {icon}
       </span>
       <div>
         <p className="text-lg font-extrabold tracking-[-0.02em] uppercase">{title}</p>

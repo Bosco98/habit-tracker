@@ -1,4 +1,5 @@
 import type { CSSProperties } from "react";
+import { AppIcon } from "@/components/app-icon";
 import type { HabitInsightView } from "./types";
 
 const CHART_SIZE = 240;
@@ -175,7 +176,7 @@ export function HabitSpiderChart({ rows }: { rows: HabitInsightView[] }) {
                 <span className="bg-hole border-line flex size-5 shrink-0 items-center justify-center rounded-[3px] border text-[10px] font-extrabold">
                   {index + 1}
                 </span>
-                <span aria-hidden>{row.entry.habit.emoji}</span>
+                <AppIcon value={row.entry.habit.emoji} className="size-3.5 shrink-0" />
                 <span className="min-w-0 flex-1 truncate font-semibold">
                   {row.entry.habit.name}
                 </span>
@@ -210,7 +211,7 @@ export function HabitComparisonChart({ rows }: { rows: HabitInsightView[] }) {
           return (
             <div key={row.entry.habit.$jazz.id} className="flex flex-col gap-1">
               <div className="flex items-center gap-2 text-xs">
-                <span aria-hidden>{row.entry.habit.emoji}</span>
+                <AppIcon value={row.entry.habit.emoji} className="size-3.5 shrink-0" />
                 <span className="min-w-0 flex-1 truncate font-semibold">
                   {row.entry.habit.name}
                 </span>

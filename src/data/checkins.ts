@@ -6,6 +6,7 @@ import type { LoadedHabit } from "./types";
 /** The effective log for one day: the latest entry wins (feeds are append-only). */
 export interface DayLog {
   value: number;
+  note?: string;
   loggedAt: number;
   editedAt?: number;
   /** Logged on a different day than it counts toward — soft signal. */
@@ -35,6 +36,7 @@ export function fullLogByDay(
     if (previous && previous.madeAt >= madeAt) continue;
     out.set(checkIn.forDay, {
       value: checkIn.value,
+      note: checkIn.note,
       loggedAt: checkIn.loggedAt,
       editedAt: checkIn.editedAt,
       backfilled: toDayKey(new Date(checkIn.loggedAt)) !== checkIn.forDay,

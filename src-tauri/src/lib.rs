@@ -28,12 +28,15 @@ fn open_main(app: AppHandle) {
 /// The popover and the main window are separate webviews, each running its own
 /// Jazz node over the same IndexedDB with no change notification between them —
 /// so a check-in in one never reached the other's list. Reloading the peer is
-/// the only mechanism available; the frontend debounces the call.
+/// the only mechanism available; the frontend waits for IndexedDB to commit
+/// and debounces the call.
 #[tauri::command]
 fn sync_peers(app: AppHandle, from: String) {
     for (label, window) in app.webview_windows() {
         if label != from {
-            let _ = window.eval("window.location.reload()");
+            if let Err(error) = window.reload() {
+                eprintln!("failed to reload desktop peer {label}: {error}");
+            }
         }
     }
 }
@@ -131,6 +134,8 @@ pub fn run() {
         // Invite links open in the user's browser rather than hijacking the app window.
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_notification::init())
+        .plugin(tauri_plugin_process::init())
+        .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(autostart)
         .manage(habit_timer::HabitTimers::default())
         .manage(reminder::Reminder::default())

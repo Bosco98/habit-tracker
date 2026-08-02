@@ -30,17 +30,22 @@ export function TopBar({
 
   return (
     <header
+      data-tauri-drag-region
       className={cn(
         "app-bar border-line bg-background sticky top-0 z-30 border-b-2",
         "flex items-center gap-3 px-4 py-2.5",
       )}
     >
-      <div className="flex min-w-0 flex-1 items-baseline gap-2">
-        <span className="truncate text-sm font-extrabold tracking-[-0.01em] uppercase">
+      <div data-tauri-drag-region className="flex min-w-0 flex-1 items-baseline gap-2">
+        <span
+          data-tauri-drag-region
+          className="truncate text-sm font-extrabold tracking-[-0.01em] uppercase"
+        >
           {title}
         </span>
         {progress && progress.total > 0 && (
           <span
+            data-tauri-drag-region
             className={cn("tnum text-sm font-extrabold", !complete && "text-muted-foreground")}
             style={complete ? { color: hueForIndex(2) } : undefined}
           >

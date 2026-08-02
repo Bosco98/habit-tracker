@@ -1,4 +1,5 @@
 import { ChevronDown, Users } from "lucide-react";
+import { AppIcon } from "@/components/app-icon";
 import { dueDaysIn } from "@/lib/cadence";
 import { formatDuration } from "@/lib/format";
 import {
@@ -51,7 +52,7 @@ export function HabitInsightRow({ row, open, onToggle }: HabitInsightRowProps) {
           className="border-line flex size-9 shrink-0 items-center justify-center rounded-lg border-2 text-lg"
           style={{ backgroundColor: row.hue, color: "var(--on-hue)" }}
         >
-          {habit.emoji}
+          <AppIcon value={habit.emoji} className="size-4" strokeWidth={2.5} />
         </span>
 
         <span className="min-w-0 flex-1">

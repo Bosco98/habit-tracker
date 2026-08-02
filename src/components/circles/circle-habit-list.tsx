@@ -1,4 +1,5 @@
 import { ChevronRight } from "lucide-react";
+import { AppIcon } from "@/components/app-icon";
 import { HabitMenu } from "@/components/habits/habit-menu";
 import { MemberAvatars } from "@/components/habits/member-avatars";
 import { habitStats } from "@/data/stats";
@@ -50,8 +51,8 @@ export function CircleHabitList({
                 className="focus-visible:ring-ring flex min-w-0 flex-1 items-center gap-3 p-3 text-left outline-none focus-visible:ring-2 focus-visible:ring-inset"
                 aria-label={`Open ${entry.habit.name} details`}
               >
-                <span className="stock-flat flex size-10 shrink-0 items-center justify-center rounded-lg text-lg">
-                  {entry.habit.emoji}
+                <span className="stock-flat flex size-10 shrink-0 items-center justify-center rounded-lg">
+                  <AppIcon value={entry.habit.emoji} className="size-5" strokeWidth={2.4} />
                 </span>
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-sm font-extrabold">

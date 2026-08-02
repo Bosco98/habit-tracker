@@ -74,14 +74,14 @@ describe("trophy celebrations", () => {
         eventType: "seven-day-circle-honor",
         honor: "allIn",
         circleName: "Weekend crew",
-        circleEmoji: "🤝",
+        circleEmoji: "\u{1F91D}",
         metricValue: 2,
         awardedAt: 3,
       }),
     ).toMatchObject({
       eyebrow: "Circle honor earned",
       title: "All In",
-      detail: "🤝 Weekend crew · Seven-day checkpoint",
+      detail: "Weekend crew · Seven-day checkpoint",
     });
   });
 });

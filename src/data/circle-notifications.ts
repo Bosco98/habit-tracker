@@ -27,6 +27,7 @@ export function circleSaveEvents(
               habitName: habit.name,
               habitKind: habit.kind,
               value: checkIn.value,
+              note: checkIn.note,
               goal: goalFor(habit.kind, habit.target),
               madeAt: entry.madeAt.getTime(),
             }];

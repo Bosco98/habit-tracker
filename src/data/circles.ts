@@ -1,6 +1,7 @@
 import { Group } from "jazz-tools";
 import { createInviteLink } from "jazz-tools/react";
 import { inviteBaseUrl } from "@/lib/links";
+import { syncDesktopPeers } from "@/lib/platform";
 import { Circle } from "./schema";
 import type { LoadedCircle, LoadedHabit, WritableAccount } from "./types";
 import { habitInit, type HabitInput } from "./mutations";
@@ -59,11 +60,15 @@ export function updateCircle(
 /** Shared habits are created into the circle's group — same shape, wider owner. */
 export function createSharedHabit(circle: LoadedCircle, input: HabitInput): void {
   circle.habits.$jazz.push(habitInit(input));
+  syncDesktopPeers();
 }
 
 export function removeSharedHabit(circle: LoadedCircle, habit: LoadedHabit): void {
   const index = circle.habits.findIndex((h) => h?.$jazz.id === habit.$jazz.id);
-  if (index >= 0) circle.habits.$jazz.splice(index, 1);
+  if (index >= 0) {
+    circle.habits.$jazz.splice(index, 1);
+    syncDesktopPeers();
+  }
 }
 
 /** Anyone with this link becomes a writer — they can log, not administrate. */
@@ -89,7 +94,10 @@ export async function joinCircle(
 
 export function leaveCircle(account: WritableAccount, circle: LoadedCircle): void {
   const index = account.root.circles.findIndex((c) => c?.$jazz.id === circle.$jazz.id);
-  if (index >= 0) account.root.circles.$jazz.splice(index, 1);
+  if (index >= 0) {
+    account.root.circles.$jazz.splice(index, 1);
+    syncDesktopPeers();
+  }
 }
 
 /** Only the creator holds admin on the circle's group. */

@@ -6,8 +6,9 @@ export interface CircleSaveEvent {
   memberName: string;
   habitId: string;
   habitName: string;
-  habitKind: "binary" | "count" | "timer";
+  habitKind: "binary" | "note" | "count" | "timer";
   value: number;
+  note?: string;
   goal: number;
   madeAt: number;
 }
@@ -38,7 +39,10 @@ function duration(seconds: number): string {
 
 export function notificationBody(event: CircleSaveEvent): string {
   if (event.value <= 0) return `${event.memberName} reset ${event.habitName}.`;
-  if (event.habitKind === "binary") {
+  if (event.habitKind === "note" && event.note) {
+    return `${event.memberName} checked in on ${event.habitName}: ${event.note}`;
+  }
+  if (event.habitKind === "binary" || event.habitKind === "note") {
     return `${event.memberName} checked in on ${event.habitName}.`;
   }
   const value =

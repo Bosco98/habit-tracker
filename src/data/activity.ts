@@ -12,6 +12,7 @@ export interface ActivityItem {
   isMe: boolean;
   forDay: DayKey;
   value: number;
+  note?: string;
   loggedAt: number;
   backfilled: boolean;
   edited: boolean;
@@ -62,6 +63,7 @@ export function circleActivity(
           isMe: member.isMe,
           forDay,
           value: log.value,
+          note: log.note,
           loggedAt: log.loggedAt,
           backfilled: log.backfilled,
           edited: log.editedAt !== undefined,
