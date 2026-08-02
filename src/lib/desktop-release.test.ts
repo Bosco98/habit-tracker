@@ -15,6 +15,7 @@ describe("desktop release configuration", () => {
     expect(workflow).toContain("uploadUpdaterJson: true");
     expect(workflow).toContain("updaterJsonPreferNsis: true");
     expect(workflow).toContain("TAURI_SIGNING_PRIVATE_KEY");
+    expect(workflow).toContain("SHA256SUMS.txt");
     expect(workflow).toContain("needs: build");
     expect(workflow).toContain("--draft=false --latest");
   });

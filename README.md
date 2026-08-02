@@ -117,14 +117,15 @@ live under `/app`.
 
 ### Desktop releases
 
-Desktop releases are built locally and uploaded to GitHub Releases:
+Desktop releases are built and signed by GitHub Actions for Windows x64, macOS Apple
+Silicon, and macOS Intel. Bump the version in `package.json`, `src-tauri/Cargo.toml`,
+and `src-tauri/tauri.conf.json`, then push a matching version tag:
 
 ```bash
-pnpm tauri build --bundles dmg
-gh release create v2.0.0 src-tauri/target/release/bundle/dmg/Habits_2.0.0_aarch64.dmg
+git tag v2.1.0
+git push origin v2.1.0
 ```
 
-Build the Intel DMG with `--target x86_64-apple-darwin`. macOS builds use ad-hoc signing
-until a Developer ID distribution certificate and notarization credentials are
-configured. A Windows NSIS installer must be produced and verified on a Windows machine
-before it is added to a release.
+The workflow holds the GitHub Release as a draft until all three builds succeed, uploads
+the updater metadata, signatures, and installer checksums, then publishes it. macOS builds
+use ad-hoc signing until Developer ID and notarization credentials are configured.

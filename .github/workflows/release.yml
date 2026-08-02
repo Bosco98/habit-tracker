@@ -120,5 +120,12 @@ jobs:
     env:
       GH_TOKEN: ${{ github.token }}
     steps:
+      - name: Attach installer checksums
+        shell: bash
+        run: |
+          mkdir release-assets
+          gh release download "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --dir release-assets --pattern "*.dmg" --pattern "*.exe"
+          (cd release-assets && sha256sum ./* | sort -k 2) > SHA256SUMS.txt
+          gh release upload "$GITHUB_REF_NAME" SHA256SUMS.txt --repo "$GITHUB_REPOSITORY" --clobber
       - name: Publish only after every platform succeeds
         run: gh release edit "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --draft=false --latest

@@ -16,13 +16,13 @@ const releaseFiles = [
   {
     title: "Apple Silicon",
     detail: "M1, M2, M3, M4, or newer Apple chips",
-    file: "Habits_2.0.0_aarch64.dmg",
+    file: "Habits_2.1.0_aarch64.dmg",
     color: "bg-chart-1",
   },
   {
     title: "Intel Mac",
     detail: "Macs that show an Intel processor",
-    file: "Habits_2.0.0_x64.dmg",
+    file: "Habits_2.1.0_x64.dmg",
     color: "bg-chart-3",
   },
 ] as const;
@@ -89,7 +89,7 @@ export function InstallGuide() {
             </h2>
             <p className="text-muted-foreground mt-2 font-semibold">
               Mac users can check Apple menu → About This Mac. Windows users need the
-              x64 setup file once it is published.
+              x64 setup file.
             </p>
           </div>
           <div className="grid gap-5 md:grid-cols-2">
@@ -115,14 +115,14 @@ export function InstallGuide() {
               <MonitorDown className="size-6" />
               <div>
                 <h3 className="text-2xl font-black">Windows 10/11 · x64</h3>
-                <p className="text-sm font-bold">Native Windows installer coming soon</p>
+                <p className="text-sm font-bold">Native Windows installer</p>
               </div>
             </div>
             <div className="p-5">
-              <p className="font-bold">
-                Use the Windows setup <code>.exe</code> only after it appears in the
-                official GitHub Release. The current V2 release contains Mac DMGs.
-              </p>
+              <p className="font-bold">64-bit Intel or AMD computers</p>
+              <code className="bg-muted border-line mt-5 block overflow-x-auto rounded-lg border-2 p-3 text-xs font-bold">
+                Habits_2.1.0_x64-setup.exe
+              </code>
             </div>
           </article>
         </section>
@@ -199,7 +199,7 @@ export function InstallGuide() {
           <div className="tear bg-muted px-6 py-5 text-sm font-extrabold sm:px-8">
             Do not disable Gatekeeper and do not run random Terminal commands. Only open
             a DMG from the official release page, and compare its SHA-256 checksum with
-            the release notes.
+            the attached <code>SHA256SUMS.txt</code> file.
           </div>
         </section>
 
@@ -220,7 +220,7 @@ export function InstallGuide() {
                 </li>
                 <li className="flex gap-3">
                   <StepNumber>2</StepNumber>
-                  Compare its SHA-256 checksum with the release notes.
+                  Compare its SHA-256 checksum with the attached SHA256SUMS file.
                 </li>
                 <li className="flex gap-3">
                   <StepNumber>3</StepNumber>
@@ -258,8 +258,8 @@ export function InstallGuide() {
             <Settings className="size-6 text-primary-strong" />
             <h2 className="mt-5 text-xl font-black">Updating later</h2>
             <p className="text-muted-foreground mt-2 text-sm leading-relaxed font-semibold">
-              On Mac, replace the old app from a newer DMG. On Windows, run the newer
-              setup file. Your local account data remains on the device.
+              The desktop app downloads signed updates automatically. Restart from the
+              update banner or Settings when an update is ready.
             </p>
           </article>
           <article className="stock-flat rounded-xl p-6">
