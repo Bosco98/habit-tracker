@@ -1,18 +1,10 @@
-import { useMemo, useState } from "react";
-import { ArrowUpRight, Bell, BellRing } from "lucide-react";
+import { useMemo } from "react";
+import { ArrowUpRight } from "lucide-react";
 import { isDueDay } from "@/lib/cadence";
 import { todayKey } from "@/lib/days";
 import { invokeDesktop } from "@/lib/platform";
-import {
-  formatTime,
-  parseTime,
-  readReminder,
-  writeReminder,
-  type Reminder,
-} from "@/lib/reminder";
 import { useAppAccount, useHabitEntries, useRetention } from "@/data/hooks";
 import { habitStats } from "@/data/stats";
-import { cn } from "@/lib/utils";
 import { WidgetRow } from "./widget-row";
 
 /**
@@ -22,8 +14,6 @@ import { WidgetRow } from "./widget-row";
 export function WidgetPanel() {
   const account = useAppAccount();
   const { personal, shared } = useHabitEntries(account);
-  const [reminder, setReminder] = useState<Reminder>(readReminder);
-  const [reminderOpen, setReminderOpen] = useState(false);
   useRetention(account);
 
   const today = todayKey();
@@ -41,11 +31,6 @@ export function WidgetPanel() {
 
   const openApp = () => invokeDesktop("open_main");
   const done = rows.filter(({ stats }) => stats.me.doneDays.has(today)).length;
-  const updateReminder = (next: Reminder) => {
-    setReminder(next);
-    writeReminder(next);
-  };
-
   if (!account.$isLoaded) return null;
 
   return (
@@ -55,57 +40,7 @@ export function WidgetPanel() {
         <span className="tnum text-muted-foreground ml-auto text-xs">
           {done} / {rows.length}
         </span>
-        <button
-          type="button"
-          aria-expanded={reminderOpen}
-          aria-controls="widget-reminder"
-          aria-label={`Daily reminder settings. Reminder is ${reminder.enabled ? `on at ${formatTime(reminder)}` : "off"}.`}
-          title="Daily reminder"
-          onClick={() => setReminderOpen((open) => !open)}
-          className={cn(
-            "stock stock-press active:stock-press-active",
-            "flex size-7 items-center justify-center rounded-md",
-            reminder.enabled && "bg-primary text-primary-foreground",
-          )}
-        >
-          {reminder.enabled ? (
-            <BellRing className="size-3.5" strokeWidth={2.5} />
-          ) : (
-            <Bell className="size-3.5" strokeWidth={2.5} />
-          )}
-        </button>
       </header>
-
-      {reminderOpen && (
-        <section
-          id="widget-reminder"
-          aria-label="Daily reminder"
-          className="stock-flat flex items-center gap-2 rounded-lg p-2"
-        >
-          <label className="flex min-w-0 flex-1 items-center gap-2 text-xs font-semibold">
-            <input
-              type="checkbox"
-              checked={reminder.enabled}
-              onChange={(event) =>
-                updateReminder({ ...reminder, enabled: event.target.checked })
-              }
-              className="border-line size-4 shrink-0 rounded-[3px] border-2 accent-[var(--hue-blue)]"
-            />
-            Remind me
-          </label>
-          <input
-            type="time"
-            aria-label="Reminder time"
-            disabled={!reminder.enabled}
-            value={formatTime(reminder)}
-            onChange={(event) => {
-              const parsed = parseTime(event.target.value);
-              if (parsed) updateReminder({ ...reminder, ...parsed });
-            }}
-            className="stock-flat bg-card tnum h-8 w-[6.5rem] rounded-md px-1.5 text-xs disabled:opacity-45"
-          />
-        </section>
-      )}
 
       {rows.length === 0 ? (
         <p className="text-muted-foreground flex-1 px-1 py-6 text-center text-sm">

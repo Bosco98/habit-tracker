@@ -6,6 +6,8 @@ import type {
   CheckIn,
   Circle,
   Habit,
+  HabitReminder,
+  PhotoActivity,
 } from "./schema";
 
 /**
@@ -21,6 +23,9 @@ export const habitResolve = {
 export const circleResolve = {
   habits: { $each: habitResolve },
   reactions: { $each: true },
+  nudges: { $each: true },
+  presence: { $each: true },
+  photoActivities: { $each: true },
 } as const;
 
 /** Depth query for the whole account tree. */
@@ -30,6 +35,7 @@ export const accountResolve = {
     habits: { $each: habitResolve },
     circles: { $each: circleResolve },
     achievements: { $each: true },
+    reminders: { $each: true },
   },
 } as const;
 
@@ -40,7 +46,7 @@ export const accountResolve = {
  */
 export const writableResolve = {
   profile: true,
-  root: { habits: true, circles: true, achievements: true },
+  root: { habits: true, circles: true, achievements: true, reminders: true },
 } as const;
 
 export type WritableAccount = co.loaded<typeof AppAccount, typeof writableResolve>;
@@ -49,6 +55,8 @@ export type LoadedHabit = co.loaded<typeof Habit, typeof habitResolve>;
 export type LoadedCheckIn = co.loaded<typeof CheckIn>;
 export type LoadedCarry = co.loaded<typeof Carry>;
 export type LoadedCircle = co.loaded<typeof Circle, typeof circleResolve>;
+export type LoadedPhotoActivity = co.loaded<typeof PhotoActivity>;
+export type LoadedHabitReminder = co.loaded<typeof HabitReminder>;
 export type LoadedAchievementEvent = co.loaded<typeof AchievementEvent>;
 export type LoadedAccount = co.loaded<typeof AppAccount, typeof accountResolve>;
 

@@ -62,7 +62,7 @@ export function CircleNotificationToggle({
         <span className="flex-1 text-sm font-semibold">Circle notifications</span>
       </label>
       <p className="text-muted-foreground mt-1 text-xs">
-        A native alert for every check-in save from another member.
+        Native alerts when someone checks in or nudges the group.
       </p>
       {guidance && <p className="text-destructive mt-2 text-xs font-semibold">{guidance}</p>}
     </section>

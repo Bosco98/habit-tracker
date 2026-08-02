@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { ArrowLeft, LogOut, Pencil, Plus, Trash2 } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { ArrowLeft, BellRing, LogOut, Pencil, Plus, Trash2 } from "lucide-react";
 import { Link, useNavigate, useParams } from "react-router";
 import { AppIcon } from "@/components/app-icon";
 import { ActivityFeed } from "@/components/circles/activity-feed";
@@ -10,11 +10,21 @@ import { CirclePulse } from "@/components/circles/circle-pulse";
 import { CircleNotificationToggle } from "@/components/circles/circle-notification-toggle";
 import { InvitePanel } from "@/components/circles/invite-panel";
 import { MemberList } from "@/components/circles/member-list";
+import { PhotoShareControl } from "@/components/circles/photo-share-control";
 import { HabitDetailSheet } from "@/components/habits/habit-detail-sheet";
 import { HabitForm } from "@/components/habits/habit-form";
 import { TopBar } from "@/components/top-bar";
 import { Button } from "@/components/ui/button";
-import { circleActivity, summarizeReactions, type ActivityItem } from "@/data/activity";
+import {
+  circleActivity,
+  summarizeReactions,
+  type CheckInActivityItem,
+} from "@/data/activity";
+import {
+  circleLastActiveByMember,
+  circleNudgeEvents,
+  nudgeCircle,
+} from "@/data/circle-social";
 import {
   addReaction,
   createSharedHabit,
@@ -29,7 +39,9 @@ import { currentCirclePulse } from "@/data/achievements";
 import { circleMembers } from "@/data/members";
 import { archiveHabit, updateHabit, type HabitInput } from "@/data/mutations";
 import type { HabitEntry, LoadedCircle, LoadedHabit } from "@/data/types";
+import { nudgeDay, wasNudgedToday } from "@/lib/circle-social";
 import { todayKey } from "@/lib/days";
+import { isDesktop } from "@/lib/platform";
 
 /**
  * A circle is a shelf, not a scoreboard: the habits everyone here keeps, the
@@ -45,6 +57,13 @@ export function CircleDetail() {
   const [editing, setEditing] = useState<HabitEntry | null>(null);
   const [detail, setDetail] = useState<HabitEntry | null>(null);
   const [editOpen, setEditOpen] = useState(false);
+  const [locallyNudgedDay, setLocallyNudgedDay] = useState<number | null>(null);
+  const [activityNow, setActivityNow] = useState(Date.now);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => setActivityNow(Date.now()), 60_000);
+    return () => window.clearInterval(timer);
+  }, []);
 
   const circle = account.$isLoaded
     ? (account.root.circles.find(
@@ -66,13 +85,24 @@ export function CircleDetail() {
         : [],
     [circle],
   );
-  const activity = useMemo(() => (circle ? circleActivity(circle, myId) : []), [circle, myId]);
+  const activity = useMemo(
+    () => (circle ? circleActivity(circle, myId, undefined, activityNow) : []),
+    [activityNow, circle, myId],
+  );
+  const nudgeEvents = useMemo(
+    () => (circle ? circleNudgeEvents(circle, myId) : []),
+    [circle, myId],
+  );
+  const lastActiveByMember = useMemo(
+    () => (circle ? circleLastActiveByMember(circle) : new Map<string, number>()),
+    [circle],
+  );
   const reactions = useMemo(
     () =>
       circle
-        ? summarizeReactions(circle, myId)
+        ? summarizeReactions(circle, myId, activityNow)
         : { counts: new Map(), mine: new Set<string>() },
-    [circle, myId],
+    [activityNow, circle, myId],
   );
   const pulse = useMemo(
     () => (circle ? currentCirclePulse(circle, myId) : null),
@@ -96,6 +126,10 @@ export function CircleDetail() {
   }
 
   const admin = isCircleAdmin(circle);
+  const todayNudge = nudgeDay();
+  const nudgedToday =
+    locallyNudgedDay === todayNudge || wasNudgedToday(nudgeEvents, todayNudge);
+  const hasOtherMembers = members.some((member) => !member.isMe);
 
   const openCreate = () => {
     setEditing(null);
@@ -114,7 +148,7 @@ export function CircleDetail() {
     else createSharedHabit(circle, input);
   };
 
-  const react = (item: ActivityItem, icon: string) =>
+  const react = (item: CheckInActivityItem, icon: string) =>
     addReaction(circle, {
       habitId: item.habitId,
       targetAccountId: item.accountId,
@@ -131,6 +165,10 @@ export function CircleDetail() {
     if (!window.confirm(`Delete "${circle.name}" for everyone in it?`)) return;
     deleteCircle(account, circle);
     void navigate("/circles");
+  };
+
+  const nudge = () => {
+    if (nudgeCircle(circle, myId)) setLocallyNudgedDay(todayNudge);
   };
 
   return (
@@ -170,7 +208,27 @@ export function CircleDetail() {
         {/* Who and how you get in stays beside the shelf on a wide screen. */}
         <div className="grid gap-6 lg:grid-cols-[18rem_1fr] lg:items-start">
           <aside className="flex flex-col gap-3">
-            <MemberList members={members} />
+            <MemberList members={members} lastActiveByMember={lastActiveByMember} />
+            {isDesktop() && (
+              <div className="flex flex-col gap-1.5">
+                <button
+                  type="button"
+                  onClick={nudge}
+                  disabled={!hasOtherMembers || nudgedToday}
+                  className="stock stock-press active:stock-press-active flex h-10 w-full items-center justify-center gap-2 rounded-lg px-3 text-sm font-bold disabled:pointer-events-none disabled:opacity-50"
+                >
+                  <BellRing className="size-4" />
+                  {!hasOtherMembers
+                    ? "No one to nudge"
+                    : nudgedToday
+                      ? "Nudged today"
+                      : "Nudge circle"}
+                </button>
+                <p className="text-muted-foreground px-1 text-xs">
+                  One group poke each day.
+                </p>
+              </div>
+            )}
             <CircleNotificationToggle
               accountId={myId}
               circleId={circle.$jazz.id}
@@ -229,8 +287,23 @@ export function CircleDetail() {
         </section>
 
         <section className="flex flex-col gap-3">
-          <h3 className="text-muted-foreground px-1 text-xs font-semibold">Lately</h3>
-          <ActivityFeed items={activity} reactions={reactions} onReact={react} />
+          <div className="flex items-start justify-between gap-3 px-1">
+            <div>
+              <h3 className="text-muted-foreground text-xs font-semibold">Lately</h3>
+              <p className="text-muted-foreground mt-0.5 text-[11px]">Clears after 24 hours</p>
+            </div>
+            <PhotoShareControl
+              circle={circle}
+              myId={myId}
+              onShared={() => setActivityNow(Date.now())}
+            />
+          </div>
+          <ActivityFeed
+            items={activity}
+            reactions={reactions}
+            onReact={react}
+            now={activityNow}
+          />
         </section>
           </div>
         </div>

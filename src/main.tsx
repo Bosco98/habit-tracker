@@ -8,7 +8,6 @@ import {
   isWidget,
   registerServiceWorker,
 } from "@/lib/platform";
-import { pushReminder, readReminder } from "@/lib/reminder";
 import { DataProvider } from "@/data/provider";
 import { ThemeProvider } from "@/components/theme-provider";
 import { WidgetPanel } from "@/components/widget/widget-panel";
@@ -18,9 +17,6 @@ import { Landing } from "@/routes/landing";
 
 applyPlatformClasses();
 registerServiceWorker();
-// The shell forgets the schedule when it exits; the window hands it back on
-// every launch, before any route mounts.
-pushReminder(readReminder());
 
 const desktop = isDesktop();
 const widget = isWidget();

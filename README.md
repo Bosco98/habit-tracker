@@ -15,6 +15,11 @@ habits with a partner or a small circle and let the weekly duel sort out who buy
 - **Sharing** — a *circle* is a CoMap owned by its own Jazz Group. Membership in the group
   *is* membership in the circle. Invite links carry the secret in the URL fragment, so it
   never reaches a server.
+- **Presence and nudges** — circle members share a compact heartbeat while the app is active;
+  the desktop app can send one circle-wide poke per UTC day and receive it as a native alert.
+- **24-hour activity** — Circle check-ins are derived from the retained habit log and shown
+  only for 24 hours. Shared photos live in separately deletable Jazz objects and are purged,
+  with their `FileStream`, by the next online Circle member after expiry.
 - **Shared habits** — one habit, one `CoFeed` of check-ins, one stream per member. Personal
   and shared habits are the same shape; only the owner differs.
 
@@ -76,6 +81,13 @@ and one tap each. It's the same bundle in a second window, told apart by
 404 inside the shell. It anchors under the tray icon, flips above it when the tray sits at
 the bottom of the screen (Windows), and hides on blur. Closing the main window leaves the
 tray running.
+
+Fresh desktop installs enable quiet launch at login on both macOS and Windows. The main
+window stays hidden, while the tray, Circle presence, reminders, and native alerts remain
+active; the setting can be turned off from the app. Every habit can have its own daily
+alarm from its detail sheet. The preference is private to that account—even for a shared
+Circle habit—and syncs from the web, but only signed-in desktop apps schedule the native
+notification.
 
 The one non-obvious constraint: Jazz fetches its WASM crypto core from a `data:` URL,
 so the CSP needs `data:` in **connect-src**, not just `wasm-unsafe-eval` in

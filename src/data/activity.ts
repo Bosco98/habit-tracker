@@ -1,22 +1,36 @@
 import { todayKey, type DayKey } from "@/lib/days";
+import { isActivityActive } from "@/lib/activity-retention";
 import { retainedLog } from "./checkins";
 import { circleMembers } from "./members";
-import type { LoadedCircle, LoadedHabit } from "./types";
+import type { LoadedCircle, LoadedHabit, LoadedPhotoActivity } from "./types";
 
-export interface ActivityItem {
+interface BaseActivityItem {
   key: string;
-  habit: LoadedHabit;
-  habitId: string;
   accountId: string;
   memberName: string;
   isMe: boolean;
+  occurredAt: number;
+}
+
+export interface CheckInActivityItem extends BaseActivityItem {
+  kind: "check-in";
+  habit: LoadedHabit;
+  habitId: string;
   forDay: DayKey;
   value: number;
   note?: string;
-  loggedAt: number;
   backfilled: boolean;
   edited: boolean;
 }
+
+export interface PhotoActivityItem extends BaseActivityItem {
+  kind: "photo";
+  photo: LoadedPhotoActivity;
+  fileId: string;
+  expiresAt: number;
+}
+
+export type ActivityItem = CheckInActivityItem | PhotoActivityItem;
 
 export interface ReactionSummary {
   /** `${habitId}|${accountId}|${forDay}` → emoji → count. */
@@ -31,18 +45,23 @@ export function activityKey(habitId: string, accountId: string, forDay: DayKey):
   return `${habitId}|${accountId}|${forDay}`;
 }
 
-export function newestActivitySummaries<T extends Pick<ActivityItem, "loggedAt">>(
+export function newestActivitySummaries<T extends Pick<ActivityItem, "occurredAt">>(
   items: readonly T[],
   limit = LATELY_LIMIT,
+  now = Date.now(),
 ): T[] {
-  return [...items].sort((a, b) => b.loggedAt - a.loggedAt).slice(0, limit);
+  return items
+    .filter((item) => isActivityActive(item.occurredAt, now))
+    .sort((a, b) => b.occurredAt - a.occurredAt)
+    .slice(0, limit);
 }
 
-/** Newest check-ins across the circle, for the feed. */
+/** Check-ins and photos active in the Circle's rolling 24-hour timeline. */
 export function circleActivity(
   circle: LoadedCircle,
   myId: string,
   limit = LATELY_LIMIT,
+  now = Date.now(),
 ): ActivityItem[] {
   const members = circleMembers(circle, myId);
   const today = todayKey();
@@ -55,6 +74,7 @@ export function circleActivity(
       for (const [forDay, log] of retainedLog(habit, member.id, today)) {
         if (log.value <= 0) continue;
         items.push({
+          kind: "check-in",
           key: activityKey(habit.$jazz.id, member.id, forDay),
           habit,
           habitId: habit.$jazz.id,
@@ -64,7 +84,7 @@ export function circleActivity(
           forDay,
           value: log.value,
           note: log.note,
-          loggedAt: log.loggedAt,
+          occurredAt: log.loggedAt,
           backfilled: log.backfilled,
           edited: log.editedAt !== undefined,
         });
@@ -72,10 +92,32 @@ export function circleActivity(
     }
   }
 
-  return newestActivitySummaries(items, limit);
+  if (circle.photoActivities?.$isLoaded) {
+    for (const photo of circle.photoActivities) {
+      if (!photo?.$isLoaded) continue;
+      const member = members.find((candidate) => candidate.id === photo.authorId);
+      items.push({
+        kind: "photo",
+        key: photo.$jazz.id,
+        photo,
+        fileId: photo.fileId,
+        accountId: photo.authorId,
+        memberName: member?.name ?? `Friend ${photo.authorId.slice(-4)}`,
+        isMe: photo.authorId === myId,
+        occurredAt: photo.createdAt,
+        expiresAt: photo.expiresAt,
+      });
+    }
+  }
+
+  return newestActivitySummaries(items, limit, now);
 }
 
-export function summarizeReactions(circle: LoadedCircle, myId: string): ReactionSummary {
+export function summarizeReactions(
+  circle: LoadedCircle,
+  myId: string,
+  now = Date.now(),
+): ReactionSummary {
   const counts = new Map<string, Map<string, number>>();
   const mine = new Set<string>();
 
@@ -86,6 +128,7 @@ export function summarizeReactions(circle: LoadedCircle, myId: string): Reaction
     for (const item of stream.all) {
       const reaction = item.value;
       if (!reaction?.$isLoaded) continue;
+      if (!isActivityActive(reaction.createdAt, now)) continue;
       const key = activityKey(reaction.habitId, reaction.targetAccountId, reaction.forDay);
       const byEmoji = counts.get(key) ?? new Map<string, number>();
       byEmoji.set(reaction.emoji, (byEmoji.get(reaction.emoji) ?? 0) + 1);

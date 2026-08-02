@@ -1,7 +1,7 @@
 import { chromium } from "playwright";
 
 const SHOTS = process.env.SHOT_DIR ?? "e2e-shots";
-const ORIGIN = "http://localhost:5173";
+const ORIGIN = "http://127.0.0.1:5173";
 const BASE = `${ORIGIN}/app`;
 const errors = [];
 const log = (...args) => console.log("·", ...args);
@@ -43,7 +43,7 @@ if (canonical !== "https://habit-tracker.fun/") {
 }
 if (
   ogImage !== "https://habit-tracker.fun/og-image.png" ||
-  softwareSchema.softwareVersion !== "2.1.0"
+  softwareSchema.softwareVersion !== "2.2.0"
 ) {
   throw new Error("landing SEO metadata is incomplete");
 }
@@ -167,6 +167,16 @@ const trophyDidNotReplay =
 await A.screenshot({ path: `${SHOTS}/14-home-shared.png` });
 log("A: logged shared habit + trophy celebration verified");
 
+// Shared habits share the habit, not the alarm: A chooses A's own time.
+await A.getByRole("button", { name: "Pushups", exact: true }).click();
+await A.getByRole("checkbox", { name: "Daily alarm for this habit" }).check();
+await A.getByLabel("At", { exact: true }).fill("07:30");
+await A.waitForTimeout(500);
+await A.screenshot({ path: `${SHOTS}/14-habit-alarm.png` });
+await A.keyboard.press("Escape");
+await A.waitForTimeout(400);
+log("A: private shared-habit alarm set from the web");
+
 // ── Device B: accept the invite as a different account ────────────────────
 const ctxB = await browser.newContext({ viewport: { width: 390, height: 844 } });
 const B = await ctxB.newPage();
@@ -201,6 +211,14 @@ await B.screenshot({ path: `${SHOTS}/16-b-home.png` });
 const bSeesShared = await B.getByText("Pushups").count();
 log("B: sees shared habit ×", bSeesShared);
 if (bSeesShared > 0) {
+  await B.getByRole("button", { name: "Pushups", exact: true }).click();
+  const bAlarmEnabled = await B.getByRole("checkbox", {
+    name: "Daily alarm for this habit",
+  }).isChecked();
+  if (bAlarmEnabled) throw new Error("A's shared-habit alarm leaked into B's account");
+  await B.keyboard.press("Escape");
+  await B.waitForTimeout(400);
+
   for (let i = 0; i < 2; i++) {
     await B.getByRole("button", { name: "Increase" }).first().click();
     await B.waitForTimeout(150);
@@ -220,6 +238,13 @@ await A.getByRole("button", { name: "Pushups", exact: true }).click();
 await A.waitForTimeout(1200);
 await A.screenshot({ path: `${SHOTS}/19-peer-compare.png` });
 const peerText = await A.locator("[role=dialog]").innerText();
+const aAlarmEnabled = await A.getByRole("checkbox", {
+  name: "Daily alarm for this habit",
+}).isChecked();
+const aAlarmTime = await A.getByLabel("At", { exact: true }).inputValue();
+if (!aAlarmEnabled || aAlarmTime !== "07:30") {
+  throw new Error("A's private shared-habit alarm did not persist");
+}
 log("A: detail sheet mentions Alex?", peerText.includes("Alex"));
 await A.keyboard.press("Escape");
 await A.waitForTimeout(500);
@@ -231,11 +256,23 @@ await A.getByRole("link", { name: /Gym buddies/ }).click();
 await A.waitForTimeout(2000);
 await A.screenshot({ path: `${SHOTS}/20-circle-shelf.png`, fullPage: true });
 log("A: circle detail rendered");
+const photoInput = A.locator('input[type="file"][accept="image/*"]');
+await photoInput.setInputFiles("public/icon-512.png");
+await A.waitForTimeout(3000);
+const photoErrors = await A.locator('[role="alert"]').allTextContents();
+if (photoErrors.length > 0) throw new Error(`photo share failed: ${photoErrors.join("; ")}`);
+await A.getByText("You shared a photo", { exact: true }).waitFor();
+await A.getByText("24h left", { exact: false }).waitFor();
+await A.screenshot({ path: `${SHOTS}/20-circle-photo.png`, fullPage: true });
+const circlePhotoRendered =
+  (await A.getByAltText("Your shared photo").count()) === 1;
 const canDelete = await A.getByRole("button", { name: "Delete circle" }).first().isVisible();
 const circleIsReadOnly =
   (await A.getByRole("button", { name: /Open Pushups details/ }).count()) === 1 &&
   (await A.getByRole("button", { name: /Punch|increment|decrement|start timer/i }).count()) === 0;
 const circleHasPulse = (await A.getByText("Circle pulse", { exact: true }).count()) === 1;
+const circleShowsPresence = (await A.getByText("Online", { exact: true }).count()) >= 2;
+if (!circleShowsPresence) throw new Error("circle member presence did not render");
 
 // React to the partner's check-in
 const reactBtn = A.getByRole("button", { name: /Support for .* check-in/ }).first();
@@ -326,6 +363,20 @@ await A.screenshot({ path: `${SHOTS}/25-desktop-home.png`, fullPage: true });
 await A.getByRole("link", { name: "Circles" }).click();
 await A.waitForTimeout(800);
 await A.screenshot({ path: `${SHOTS}/26-desktop-circles.png`, fullPage: true });
+// Expose the desktop-only controls without invoking a native build. The app
+// already mounted as web, so no Tauri plugin calls are made in this browser.
+await A.evaluate(() => Object.defineProperty(window, "__TAURI_INTERNALS__", {
+  configurable: true,
+  value: { invoke: async () => undefined },
+}));
+await A.getByRole("link", { name: /Gym buddies/ }).click();
+await A.waitForTimeout(500);
+const desktopNudge = A.getByRole("button", { name: "Nudge circle" });
+const desktopNudgeVisible = await desktopNudge.isVisible();
+await desktopNudge.click();
+const desktopNudgeConsumed = await A.getByRole("button", { name: "Nudged today" }).isDisabled();
+await A.screenshot({ path: `${SHOTS}/26-desktop-circle-poke.png`, fullPage: true });
+await A.evaluate(() => delete window.__TAURI_INTERNALS__);
 await A.getByRole("link", { name: "Insights" }).click();
 await A.waitForTimeout(500);
 await A.screenshot({ path: `${SHOTS}/27-desktop-insights.png`, fullPage: true });
@@ -357,10 +408,13 @@ console.log("  C restored from phrase:", cHasRun > 0);
 console.log("  creator can delete the circle:", canDelete);
 console.log("  circle habit list is read-only:", circleIsReadOnly);
 console.log("  circle pulse rendered:", circleHasPulse);
+console.log("  circle member presence rendered:", circleShowsPresence);
+console.log("  24-hour circle photo rendered:", circlePhotoRendered);
 console.log("  You route starts at the top:", youStartsAtTop);
 console.log("  You and Insights are separate:", youIsProfileOnly && insightsIsAnalyticsOnly);
 console.log("  desktop rail replaces pill:", railVisible && !pillVisible);
 console.log("  habits go multi-column:", columns > 1);
+console.log("  desktop circle poke is consumed:", desktopNudgeVisible && desktopNudgeConsumed);
 console.log("  insights show shared members:", insightHasAlex);
 console.log("  insights keep one row open:", oneInsightOpen);
 console.log("  insights filters apply:", personalFilterHidesShared);

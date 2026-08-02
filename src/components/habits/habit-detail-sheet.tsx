@@ -15,6 +15,7 @@ import { relativeDay } from "@/lib/days";
 import { completionRate, momentum } from "@/lib/insights";
 import { RETENTION_DAYS, retentionWindow } from "@/lib/retention";
 import { PeerRow } from "./peer-row";
+import { HabitReminderSetting } from "./habit-reminder-setting";
 
 interface HabitDetailSheetProps {
   entry: HabitEntry | null;
@@ -127,6 +128,8 @@ export function HabitDetailSheet({
               />
             ))}
           </div>
+
+          <HabitReminderSetting habitId={entry.habit.$jazz.id} />
 
           {notes.length > 0 && (
             <section className="flex flex-col gap-2" aria-labelledby="check-in-notes-title">

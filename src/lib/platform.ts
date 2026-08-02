@@ -26,7 +26,7 @@ export function applyPlatformClasses(): void {
 }
 
 interface TauriInternals {
-  invoke: (cmd: string, args?: Record<string, unknown>) => Promise<unknown>;
+  invoke?: (cmd: string, args?: Record<string, unknown>) => Promise<unknown>;
 }
 
 /**
@@ -37,7 +37,8 @@ export function invokeDesktop(cmd: string, args?: Record<string, unknown>): void
   if (!isDesktop()) return;
   const internals = (window as unknown as { __TAURI_INTERNALS__?: TauriInternals })
     .__TAURI_INTERNALS__;
-  void internals?.invoke(cmd, args);
+  if (typeof internals?.invoke !== "function") return;
+  void internals.invoke(cmd, args);
 }
 
 let syncTimer: ReturnType<typeof setTimeout> | undefined;

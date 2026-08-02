@@ -1,4 +1,5 @@
 import { goalFor } from "@/lib/completion";
+import { isActivityActive } from "@/lib/activity-retention";
 import type { CircleSaveEvent } from "@/lib/circle-notifications";
 import { circleMembers, memberName } from "./members";
 import type { LoadedCircle } from "./types";
@@ -7,6 +8,7 @@ import type { LoadedCircle } from "./types";
 export function circleSaveEvents(
   circles: readonly LoadedCircle[],
   myId: string,
+  now = Date.now(),
 ): CircleSaveEvent[] {
   return circles.flatMap((circle) => {
     const members = circleMembers(circle, myId);
@@ -17,6 +19,7 @@ export function circleSaveEvents(
           [...stream.all].flatMap((entry) => {
             const checkIn = entry.value;
             if (!checkIn?.$isLoaded) return [];
+            if (!isActivityActive(checkIn.loggedAt, now)) return [];
             return [{
               id: checkIn.$jazz.id,
               circleId: circle.$jazz.id,

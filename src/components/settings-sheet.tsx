@@ -11,7 +11,6 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { PassphraseDisplay } from "@/components/auth/passphrase-display";
-import { ReminderSetting } from "@/components/reminder-setting";
 import { OpenAtLoginSetting } from "@/components/open-at-login-setting";
 import { DesktopUpdateSetting } from "@/components/desktop-updater";
 import { SyncBadge } from "@/components/sync-badge";
@@ -123,7 +122,6 @@ export function SettingsSheet({ open, onOpenChange, onSignUp, onLogIn }: Setting
             </section>
 
             <div className="flex flex-col gap-3">
-              <ReminderSetting />
               <OpenAtLoginSetting />
               <DesktopUpdateSetting />
               <section className="stock-flat flex flex-col gap-1 rounded-lg p-3">

@@ -138,13 +138,13 @@ pub fn run() {
         .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(autostart)
         .manage(habit_timer::HabitTimers::default())
-        .manage(reminder::Reminder::default())
+        .manage(reminder::Reminders::default())
         .invoke_handler(tauri::generate_handler![
             open_main,
             sync_peers,
             habit_timer::start_habit_timer,
             habit_timer::cancel_habit_timer,
-            reminder::set_reminder
+            reminder::set_habit_reminders
         ])
         .setup(|app| {
             build_tray(app.handle())?;

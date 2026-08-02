@@ -19,7 +19,7 @@ export function OpenAtLoginSetting() {
       setEnabled(next);
       setError("");
     } catch {
-      setError("macOS could not update the login item. Try again.");
+      setError("The system could not update the login item. Try again.");
     }
   };
 

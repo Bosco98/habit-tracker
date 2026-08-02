@@ -3,7 +3,13 @@ import {
   REACTION_ICON_OPTIONS,
 } from "@/lib/app-icons";
 import { AppIcon } from "@/components/app-icon";
-import { activityKey, type ActivityItem, type ReactionSummary } from "@/data/activity";
+import { PhotoActivityCard } from "@/components/circles/photo-activity-card";
+import {
+  activityKey,
+  type ActivityItem,
+  type CheckInActivityItem,
+  type ReactionSummary,
+} from "@/data/activity";
 import { relativeDay, todayKey } from "@/lib/days";
 import { formatDuration } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -11,22 +17,23 @@ import { cn } from "@/lib/utils";
 interface ActivityFeedProps {
   items: ActivityItem[];
   reactions: ReactionSummary;
-  onReact: (item: ActivityItem, emoji: string) => void;
+  onReact: (item: CheckInActivityItem, emoji: string) => void;
+  now: number;
 }
 
-function describe(item: ActivityItem): string {
+function describe(item: CheckInActivityItem): string {
   if (item.habit.kind === "timer") return formatDuration(item.value);
   if (item.habit.kind === "count") return `${item.value}×`;
   return "done";
 }
 
-export function ActivityFeed({ items, reactions, onReact }: ActivityFeedProps) {
+export function ActivityFeed({ items, reactions, onReact, now }: ActivityFeedProps) {
   const today = todayKey();
 
   if (items.length === 0) {
     return (
       <p className="text-muted-foreground py-6 text-center text-sm">
-        No check-ins yet. Be the first.
+        Nothing shared in the last 24 hours.
       </p>
     );
   }
@@ -34,6 +41,10 @@ export function ActivityFeed({ items, reactions, onReact }: ActivityFeedProps) {
   return (
     <ul className="flex flex-col gap-2">
       {items.map((item) => {
+        if (item.kind === "photo") {
+          return <PhotoActivityCard key={item.key} item={item} now={now} />;
+        }
+
         const key = activityKey(item.habitId, item.accountId, item.forDay);
         const counts = reactions.counts.get(key);
         const alreadyReacted = reactions.mine.has(key);

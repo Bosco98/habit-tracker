@@ -47,6 +47,17 @@ export const Habit = co.map({
 
 export const HabitList = co.list(Habit);
 
+/** One user's private alarm preference for a habit. Never owned by a Circle. */
+export const HabitReminder = co.map({
+  habitId: z.string(),
+  enabled: z.boolean(),
+  hour: z.number(),
+  minute: z.number(),
+  updatedAt: z.number(),
+});
+
+export const HabitReminderList = co.list(HabitReminder);
+
 /** A one-tap emoji on someone's day of a shared habit. */
 export const Reaction = co.map({
   habitId: z.string(),
@@ -56,6 +67,31 @@ export const Reaction = co.map({
   emoji: z.string(),
   createdAt: z.number(),
 });
+
+/** A single circle-wide poke. Authorship and time come from its feed entry. */
+export const Nudge = co.map({
+  /** UTC day bucket: every member shares the same once-a-day boundary. */
+  day: z.number(),
+});
+
+/** Latest activity for one app session. The map is updated in place. */
+export const Presence = co.map({
+  lastActiveAt: z.number(),
+});
+
+export const PhotoFile = co.fileStream();
+
+/** A photo shared to the Circle's 24-hour activity timeline. */
+export const PhotoActivity = co.map({
+  authorId: z.string(),
+  file: PhotoFile,
+  /** Kept separately so the file can stay lazy until the card is visible. */
+  fileId: z.string(),
+  createdAt: z.number(),
+  expiresAt: z.number(),
+});
+
+export const PhotoActivityList = co.list(PhotoActivity);
 
 /**
  * A circle — owned by a Jazz Group; members are the Group's members.
@@ -68,6 +104,10 @@ export const Circle = co.map({
   emoji: z.string(),
   habits: HabitList,
   reactions: co.feed(Reaction),
+  nudges: co.feed(Nudge),
+  presence: co.feed(Presence),
+  /** Optional for circles created before photo sharing shipped. */
+  photoActivities: co.optional(PhotoActivityList),
   createdAt: z.number(),
 });
 
@@ -97,19 +137,26 @@ export const AccountRoot = co.map({
   habits: HabitList,
   circles: CircleList,
   achievements: AchievementFeed,
+  reminders: co.optional(HabitReminderList),
 });
 
 export const AppAccount = co
   .account({ root: AccountRoot, profile: co.profile() })
   .withMigration(async (account) => {
     if (account.root === undefined) {
-      account.$jazz.set("root", { habits: [], circles: [], achievements: [] });
+      account.$jazz.set("root", {
+        habits: [],
+        circles: [],
+        achievements: [],
+        reminders: [],
+      });
       return;
     }
-    // Forward-compat for roots created before circles or achievements existed.
+    // Forward-compat for roots created before these collections existed.
     const { root } = await account.$jazz.ensureLoaded({ resolve: { root: true } });
     if (root.circles === undefined) root.$jazz.set("circles", []);
     if (root.achievements === undefined) root.$jazz.set("achievements", []);
+    if (root.reminders === undefined) root.$jazz.set("reminders", []);
   });
 
 export type AppAccountType = co.loaded<typeof AppAccount>;
