@@ -52,8 +52,7 @@ export function HabitList({
       {label && (
         <h2 className="text-muted-foreground px-1 text-xs font-semibold">{label}</h2>
       )}
-      {/* `items-start` so a tall card doesn't stretch its row-mates. */}
-      <div className="grid items-start gap-3 md:grid-cols-2 xl:grid-cols-3">
+      <div className="flex flex-col gap-3">
         {entries.map((entry, index) => (
           <HabitCard
             key={entry.habit.$jazz.id}
