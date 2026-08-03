@@ -9,6 +9,7 @@ import { DesktopUpdateBanner } from "@/components/desktop-updater";
 import { readAchievementEvents } from "@/data/achievements";
 import { circleSaveEvents } from "@/data/circle-notifications";
 import { cleanupExpiredCirclePhotos } from "@/data/photo-activities";
+import { repairStoredAppIcons } from "@/data/icon-compatibility";
 import {
   habitReminderSignature,
   pushAccountHabitReminders,
@@ -149,6 +150,11 @@ export function BackgroundServices() {
   }, []);
 
   useEffect(() => startDesktopUpdater(), []);
+
+  useEffect(() => {
+    if (!account.$isLoaded) return;
+    repairStoredAppIcons(account);
+  }, [account]);
 
   useEffect(() => {
     if (!account.$isLoaded) return;

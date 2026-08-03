@@ -1,6 +1,7 @@
 import { normalizeCadence, type Cadence } from "@/lib/cadence";
 import type { HabitKind } from "@/lib/completion";
 import type { DayKey } from "@/lib/days";
+import { storedAppIcon } from "@/lib/app-icons";
 import { syncDesktopPeers } from "@/lib/platform";
 import type { LoadedHabit, WritableAccount } from "./types";
 
@@ -21,7 +22,7 @@ export function createHabit(account: WritableAccount, input: HabitInput): void {
 export function habitInit(input: HabitInput) {
   return {
     name: input.name,
-    emoji: input.emoji,
+    emoji: storedAppIcon(input.emoji, "habit"),
     kind: input.kind,
     target: input.target,
     everyDays: normalizeCadence(input.cadence.everyDays).everyDays,
@@ -33,7 +34,7 @@ export function habitInit(input: HabitInput) {
 
 export function updateHabit(habit: LoadedHabit, input: HabitInput): void {
   habit.$jazz.set("name", input.name);
-  habit.$jazz.set("emoji", input.emoji);
+  habit.$jazz.set("emoji", storedAppIcon(input.emoji, "habit"));
   habit.$jazz.set("kind", input.kind);
   habit.$jazz.set("target", input.target);
   habit.$jazz.set("everyDays", normalizeCadence(input.cadence.everyDays).everyDays);

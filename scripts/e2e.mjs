@@ -43,7 +43,7 @@ if (canonical !== "https://habit-tracker.fun/") {
 }
 if (
   ogImage !== "https://habit-tracker.fun/og-image.png" ||
-  softwareSchema.softwareVersion !== "2.2.1"
+  softwareSchema.softwareVersion !== "2.2.2"
 ) {
   throw new Error("landing SEO metadata is incomplete");
 }

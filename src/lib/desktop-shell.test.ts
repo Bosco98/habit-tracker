@@ -21,4 +21,19 @@ describe("desktop window chrome", () => {
     expect(sideRail).toContain("data-tauri-drag-region");
     expect(sideRail).toContain("onMouseDown={startDesktopWindowDrag}");
   });
+
+  it("refreshes the hidden tray webview before opening it", () => {
+    const shell = readFileSync(
+      new URL("../../src-tauri/src/lib.rs", import.meta.url),
+      "utf8",
+    );
+    const toggleWidget = shell.slice(
+      shell.indexOf("fn toggle_widget"),
+      shell.indexOf("fn build_tray"),
+    );
+
+    expect(toggleWidget).toContain("window.reload()");
+    expect(toggleWidget.indexOf("window.reload()"))
+      .toBeLessThan(toggleWidget.indexOf("window.show()"));
+  });
 });

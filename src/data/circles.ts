@@ -1,6 +1,7 @@
 import { Group } from "jazz-tools";
 import { createInviteLink } from "jazz-tools/react";
 import { inviteBaseUrl } from "@/lib/links";
+import { storedAppIcon } from "@/lib/app-icons";
 import { syncDesktopPeers } from "@/lib/platform";
 import { Circle } from "./schema";
 import type { LoadedCircle, LoadedHabit, WritableAccount } from "./types";
@@ -38,7 +39,7 @@ export function createCircle(
   const circle = Circle.create(
     {
       name: input.name,
-      emoji: input.emoji,
+      emoji: storedAppIcon(input.emoji, "circle"),
       habits: [],
       reactions: [],
       nudges: [],
@@ -57,7 +58,7 @@ export function updateCircle(
   input: { name: string; emoji: string },
 ): void {
   circle.$jazz.set("name", input.name);
-  circle.$jazz.set("emoji", input.emoji);
+  circle.$jazz.set("emoji", storedAppIcon(input.emoji, "circle"));
 }
 
 /** Shared habits are created into the circle's group — same shape, wider owner. */
@@ -131,5 +132,9 @@ export function addReaction(
   circle: LoadedCircle,
   input: { habitId: string; targetAccountId: string; forDay: string; emoji: string },
 ): void {
-  circle.reactions.$jazz.push({ ...input, createdAt: Date.now() });
+  circle.reactions.$jazz.push({
+    ...input,
+    emoji: storedAppIcon(input.emoji, "reaction"),
+    createdAt: Date.now(),
+  });
 }

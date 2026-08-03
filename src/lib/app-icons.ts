@@ -186,6 +186,60 @@ const OPTIONS: Record<AppIconKind, readonly string[]> = {
   reaction: REACTION_ICON_OPTIONS,
 };
 
+/**
+ * CoValues keep a Unicode fallback for clients released before the Lucide
+ * icon picker. Current clients normalize these values back to stable icon ids
+ * before rendering; older clients still show a real symbol instead of text
+ * such as "sprout".
+ */
+const STORED_ICONS: Record<AppIconKind, Record<string, string>> = {
+  habit: {
+    sprout: "\u{1F331}",
+    activity: "\u{1F3C3}",
+    brain: "\u{1F9E0}",
+    dumbbell: "\u{1F4AA}",
+    "book-open": "\u{1F4DA}",
+    timer: "\u{1F9D8}",
+    droplets: "\u{1F4A7}",
+    apple: "\u{1F957}",
+    moon: "\u{1F634}",
+    sparkles: "\u{1FAA5}",
+    music: "\u{1F3B8}",
+    pen: "\u{270D}\u{FE0F}",
+    house: "\u{1F9F9}",
+    "piggy-bank": "\u{1F4B8}",
+    phone: "\u{260E}\u{FE0F}",
+    ban: "\u{1F6AD}",
+    snowflake: "\u{1F9CA}",
+    target: "\u{1F3AF}",
+  },
+  circle: {
+    "heart-handshake": "\u{1F91D}",
+    house: "\u{1F3E1}",
+    users: "\u{1F46F}",
+    boxes: "\u{1F41D}",
+    rocket: "\u{1F680}",
+    waves: "\u{1F30A}",
+    flame: "\u{1F525}",
+    earth: "\u{1F30D}",
+    tent: "\u{1F3AA}",
+    puzzle: "\u{1F9E9}",
+    mountain: "\u{26F0}\u{FE0F}",
+    "life-buoy": "\u{1F6DF}",
+    clover: "\u{1F340}",
+    orbit: "\u{1FA90}",
+    celebration: "\u{1F388}",
+    shell: "\u{1F419}",
+    compass: "\u{1F9ED}",
+    person: "\u{1F464}",
+  },
+  reaction: {
+    support: "\u{1F44F}",
+    energy: "\u{1F525}",
+    effort: "\u{1F624}",
+  },
+};
+
 export function normalizeAppIcon(value: string | undefined, kind: AppIconKind): string {
   const reactionOverride =
     kind === "reaction" && value === "\u{1F525}" ? "energy" : undefined;
@@ -193,6 +247,17 @@ export function normalizeAppIcon(value: string | undefined, kind: AppIconKind): 
     ? (reactionOverride ?? LEGACY_ICONS[value] ?? value)
     : DEFAULT_ICON[kind];
   return OPTIONS[kind].includes(normalized) ? normalized : DEFAULT_ICON[kind];
+}
+
+export function storedAppIcon(value: string | undefined, kind: AppIconKind): string {
+  return STORED_ICONS[kind][normalizeAppIcon(value, kind)];
+}
+
+export function isStoredAppIconId(
+  value: string | undefined,
+  kind: AppIconKind,
+): value is string {
+  return Boolean(value && OPTIONS[kind].includes(value));
 }
 
 export function appIconLabel(value: string, kind: AppIconKind): string {
