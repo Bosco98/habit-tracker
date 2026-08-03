@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 describe("desktop window chrome", () => {
-  it("grants dragging and marks both desktop header surfaces as drag regions", () => {
+  it("grants dragging and wires both desktop header surfaces to native dragging", () => {
     const capability = JSON.parse(
       readFileSync(new URL("../../src-tauri/capabilities/default.json", import.meta.url), "utf8"),
     ) as { permissions: string[] };
@@ -17,6 +17,8 @@ describe("desktop window chrome", () => {
 
     expect(capability.permissions).toContain("core:window:allow-start-dragging");
     expect(topBar).toContain("data-tauri-drag-region");
+    expect(topBar).toContain("onMouseDown={startDesktopWindowDrag}");
     expect(sideRail).toContain("data-tauri-drag-region");
+    expect(sideRail).toContain("onMouseDown={startDesktopWindowDrag}");
   });
 });

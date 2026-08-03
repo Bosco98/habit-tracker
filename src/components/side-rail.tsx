@@ -1,5 +1,6 @@
 import { NavLink } from "react-router";
 import { NAV_ITEMS } from "@/lib/nav";
+import { startDesktopWindowDrag } from "@/lib/platform";
 import { cn } from "@/lib/utils";
 
 /**
@@ -13,6 +14,7 @@ export function SideRail() {
   return (
     <nav
       data-tauri-drag-region
+      onMouseDown={startDesktopWindowDrag}
       aria-label="Main"
       className="side-rail border-line bg-card sticky top-0 hidden h-dvh w-56 shrink-0 flex-col gap-1 border-r-2 px-3 py-4 md:flex"
     >

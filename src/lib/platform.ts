@@ -1,3 +1,5 @@
+import { getCurrentWindow } from "@tauri-apps/api/window";
+
 /** True inside the Tauri desktop shell. */
 export const isDesktop = (): boolean =>
   typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
@@ -39,6 +41,27 @@ export function invokeDesktop(cmd: string, args?: Record<string, unknown>): void
     .__TAURI_INTERNALS__;
   if (typeof internals?.invoke !== "function") return;
   void internals.invoke(cmd, args);
+}
+
+const DRAG_CONTROL_SELECTOR =
+  "a, button, input, select, textarea, [role='button'], [contenteditable='true']";
+
+interface DesktopDragEvent {
+  button: number;
+  target: EventTarget | null;
+}
+
+/**
+ * Begin a real native window drag from otherwise-empty app chrome. The
+ * `data-tauri-drag-region` attributes remain as a passive fallback, but this
+ * explicit call is reliable with overlay title bars on both desktop targets.
+ */
+export function startDesktopWindowDrag(event: DesktopDragEvent): void {
+  if (!isDesktop() || event.button !== 0 || !(event.target instanceof Element)) return;
+  if (event.target.closest(DRAG_CONTROL_SELECTOR)) return;
+  void getCurrentWindow().startDragging().catch((error: unknown) => {
+    console.error("desktop window drag failed", error);
+  });
 }
 
 let syncTimer: ReturnType<typeof setTimeout> | undefined;

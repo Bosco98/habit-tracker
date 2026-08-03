@@ -2,6 +2,7 @@ import { Plus } from "lucide-react";
 import { AccountMenu } from "@/components/account-menu";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { hueForIndex } from "@/lib/habit-color";
+import { startDesktopWindowDrag } from "@/lib/platform";
 import { cn } from "@/lib/utils";
 
 interface TopBarProps {
@@ -31,6 +32,7 @@ export function TopBar({
   return (
     <header
       data-tauri-drag-region
+      onMouseDown={startDesktopWindowDrag}
       className={cn(
         "app-bar border-line bg-background sticky top-0 z-30 border-b-2",
         "flex items-center gap-3 px-4 py-2.5",
