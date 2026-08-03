@@ -78,12 +78,6 @@ fn toggle_widget(app: &AppHandle, icon: Rect) {
         let _ = window.hide();
         return;
     }
-    // The hidden webview can retain an older Jazz account snapshot,
-    // especially under WebView2. Re-read IndexedDB before every open so the
-    // Windows tray lists the same habits as the main window.
-    if let Err(error) = window.reload() {
-        eprintln!("failed to refresh tray widget: {error}");
-    }
     place_under_tray(&window, icon);
     let _ = window.show();
     let _ = window.set_focus();

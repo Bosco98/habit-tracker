@@ -104,8 +104,9 @@ export const Circle = co.map({
   emoji: z.string(),
   habits: HabitList,
   reactions: co.feed(Reaction),
-  nudges: co.feed(Nudge),
-  presence: co.feed(Presence),
+  /** Optional for circles created before nudges and presence shipped. */
+  nudges: co.optional(co.feed(Nudge)),
+  presence: co.optional(co.feed(Presence)),
   /** Optional for circles created before photo sharing shipped. */
   photoActivities: co.optional(PhotoActivityList),
   createdAt: z.number(),

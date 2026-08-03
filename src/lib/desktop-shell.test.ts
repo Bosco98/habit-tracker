@@ -22,7 +22,7 @@ describe("desktop window chrome", () => {
     expect(sideRail).toContain("onMouseDown={startDesktopWindowDrag}");
   });
 
-  it("refreshes the hidden tray webview before opening it", () => {
+  it("shows the prepared tray webview without a reload/focus race", () => {
     const shell = readFileSync(
       new URL("../../src-tauri/src/lib.rs", import.meta.url),
       "utf8",
@@ -32,8 +32,9 @@ describe("desktop window chrome", () => {
       shell.indexOf("fn build_tray"),
     );
 
-    expect(toggleWidget).toContain("window.reload()");
-    expect(toggleWidget.indexOf("window.reload()"))
-      .toBeLessThan(toggleWidget.indexOf("window.show()"));
+    expect(toggleWidget).not.toContain("window.reload()");
+    expect(toggleWidget).toContain("window.show()");
+    expect(toggleWidget.indexOf("window.show()"))
+      .toBeLessThan(toggleWidget.indexOf("window.set_focus()"));
   });
 });

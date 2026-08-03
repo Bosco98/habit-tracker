@@ -1,6 +1,6 @@
 [package]
 name = "habits"
-version = "2.2.2"
+version = "2.2.3"
 description = "A local-first, end-to-end encrypted habit tracker"
 authors = ["bosco"]
 edition = "2021"

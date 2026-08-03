@@ -10,9 +10,11 @@ export function circleNudgeEvents(
   circle: LoadedCircle,
   myId: string,
 ): CircleNudgeEvent[] {
+  const nudges = circle.nudges;
+  if (!nudges?.$isLoaded) return [];
   const members = circleMembers(circle, myId);
 
-  return Object.entries(circle.nudges.perAccount).flatMap(
+  return Object.entries(nudges.perAccount).flatMap(
     ([accountId, stream]) =>
       [...stream.all].flatMap((entry) => {
         const nudge = entry.value;
@@ -40,23 +42,30 @@ export function allCircleNudgeEvents(
 export function nudgeCircle(circle: LoadedCircle, myId: string): boolean {
   const today = nudgeDay();
   if (wasNudgedToday(circleNudgeEvents(circle, myId), today)) return false;
+  if (!circle.nudges?.$isLoaded) circle.$jazz.set("nudges", []);
+  if (!circle.nudges?.$isLoaded) return false;
   circle.nudges.$jazz.push({ day: today });
   return true;
 }
 
 export function touchCirclePresence(circle: LoadedCircle, at = Date.now()): void {
-  const current = circle.presence.inCurrentSession?.value;
+  if (!circle.presence?.$isLoaded) circle.$jazz.set("presence", []);
+  const presence = circle.presence;
+  if (!presence?.$isLoaded) return;
+  const current = presence.inCurrentSession?.value;
   if (current?.$isLoaded) {
     current.$jazz.set("lastActiveAt", at);
   } else {
-    circle.presence.$jazz.push({ lastActiveAt: at });
+    presence.$jazz.push({ lastActiveAt: at });
   }
 }
 
 export function circleLastActiveByMember(circle: LoadedCircle): Map<string, number> {
   const latest = new Map<string, number>();
+  const presence = circle.presence;
+  if (!presence?.$isLoaded) return latest;
 
-  for (const [accountId, stream] of Object.entries(circle.presence.perAccount)) {
+  for (const [accountId, stream] of Object.entries(presence.perAccount)) {
     for (const entry of stream.all) {
       const presence = entry.value;
       if (!presence?.$isLoaded) continue;
